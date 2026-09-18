@@ -1,0 +1,17 @@
+/.idea
+/.vscode
+/mysql
+/mysql_log
+.env
+error.log
+
+/docker/nextjs/node_modules
+/docker/nextjs/.next
+/node_modules
+/packages
+/.pnp
+.pnp.js
+.npmrc
+.vscode
+kubeconfig
+update.sh

@@ -1,0 +1,391 @@
+include:
+  - 'ci/additional-ci.yml'
+
+
+stages:
+  - schedule
+  - restore
+  - cleanup
+  - migrate
+  - build
+  - test
+  - deploy
+
+default:
+  tags:
+    - docker
+    - htz
+
+variables:
+  TAP_DOCKER_REPO: $CI_REGISTRY_IMAGE
+  FRONT_IMAGE: $TAP_DOCKER_REPO/react
+  TON_IMAGE: $TAP_DOCKER_REPO/ton
+  FPM_IMAGE: $TAP_DOCKER_REPO/fpm
+  NGINX_IMAGE: $TAP_DOCKER_REPO/nginx-fpm
+  FRONT_VERSION:
+    description: Set version for front( v1.*.* related on tags)
+  PHP_VERSION:
+    description: Set version for php( v1.*.* related on tags)
+  TON_VERSION:
+    description: Set version for ton( v1.*.* related on tags)
+  RESTORE_FROM_PROD:
+    description: Run restore operation from prod db
+    value: "no"
+    options:
+      - "yes"
+      - "no"
+
+build nginx-fpm:
+  stage: build
+  extends: .build
+  variables:
+    APP_NAME: nginx-fpm
+    DOCKER_NAME: nginx
+    COMPONENT_NAME: php
+
+build fpm:
+  stage: build
+  extends: .build
+  variables:
+    APP_NAME: fpm
+    DOCKER_NAME: fpm
+    COMPONENT_NAME: php
+
+build front prod:
+  stage: build
+  extends: .build_front
+  resource_group: production/front
+  environment:
+    name: production
+  variables:
+    APP_NAME: react
+    DOCKER_NAME: node
+    COMPONENT_NAME: front
+  rules:
+    - !reference [.rules_tags_always]
+
+build front test:
+  stage: build
+  extends: .build_front
+  resource_group: test
+  environment:
+    name: test
+  variables:
+    APP_NAME: react
+    DOCKER_NAME: node
+    COMPONENT_NAME: front
+    TEST_ENV: /.*test-1.*/
+  rules:
+    - !reference [.rules_develop_test_run]
+    - !reference [.rules_develop_manual]
+
+build front test2:
+  stage: build
+  extends: .build_front
+  resource_group: test2
+  environment:
+    name: test2
+  variables:
+    APP_NAME: react
+    DOCKER_NAME: node
+    COMPONENT_NAME: front
+    TEST_ENV: /.*test-2.*/
+  rules:
+    - !reference [.rules_develop_test_run]
+    - !reference [.rules_develop_manual]
+
+build front stage:
+  stage: build
+  extends: .build_front
+  resource_group: stage
+  environment:
+    name: stage
+  variables:
+    APP_NAME: react
+    DOCKER_NAME: node
+    COMPONENT_NAME: front
+    TEST_ENV: /.*stage.*/
+  rules:
+    - !reference [.rules_develop_test_run]
+    - !reference [.rules_develop_manual]
+
+build ton:
+  stage: build
+  extends: .build
+  variables:
+    APP_NAME: ton
+    DOCKER_NAME: ton
+    COMPONENT_NAME: ton
+  rules:
+    - !reference [.rules_develop_always]
+    - !reference [.rules_tags_always]
+
+test PHP:
+  stage: test
+  needs:
+    - build fpm
+    - job: build nginx-fpm
+      optional: true
+  allow_failure: true
+  resource_group: testing/php
+  tags:
+    - test
+    - shell
+  rules:
+    - !reference [.rules_develop_success]
+    - !reference [.rules_tags_always]
+  before_script:
+    - !reference [.script_before_docker_login]
+    - !reference [.script_before_docker_version]
+  script:
+    - mkdir junit
+    - chmod 777 junit
+    - docker compose --file ./ci/docker-compose.testing.yaml run --rm --interactive php-test
+  artifacts:
+    when: always
+    expire_in: 1d
+    untracked: true
+    paths:
+      - junit/php-junit.xml
+    reports:
+      junit: junit/php-junit.xml
+
+test FRONT:
+  stage: test
+  allow_failure: true
+  resource_group: testing/front
+  needs:
+    - job: "build front stage"
+      optional: true
+    - job: "build front test"
+      optional: true
+    - job: "build front test2"
+      optional: true
+  tags:
+    - test
+    - shell
+  rules:
+    - if: "$CI_COMMIT_MESSAGE =~ '/.*test-2.*/'"
+      needs:
+        - build front test2
+    - if: "$CI_COMMIT_MESSAGE =~ '/.*test-1.*/'"
+      needs:
+        - build front test
+    - if: "$CI_COMMIT_MESSAGE =~ '/.*stage.*/'"
+      needs:
+        - build front stage
+    - !reference [.rules_develop_success]
+    - !reference [.rules_tags_always]
+    - when: manual
+  before_script:
+    - !reference [.script_before_docker_login]
+    - !reference [.script_before_docker_version]
+  script:
+    - mkdir junit
+    - chmod 777 junit
+    - docker compose --file ./ci/docker-compose.testing.yaml run --rm --build --interactive front-test
+  artifacts:
+    when: always
+    expire_in: 1d
+    untracked: true
+    paths:
+      - junit/front-junit.xml
+    reports:
+      junit: junit/front-junit.xml
+
+deploy prod:
+  stage: deploy
+  image: "ghcr.io/helmfile/helmfile:v0.165.0"
+  resource_group: production/php
+  needs:
+    - build fpm
+    - build nginx-fpm
+    - build ton
+    - build front prod
+  tags:
+    - docker
+    - htz
+  environment:
+    name: production
+    url: https://mmbump.pro
+  rules:
+    - !reference [.rules_tags_success]
+  before_script:
+    - echo $KUBECONFIG | base64 -d > ${PWD}/.kubeconfig
+    - export KUBECONFIG=${PWD}/.kubeconfig
+  script:
+    - helmfile -e prod apply -f ./ci/helmfile.yaml --wait
+  after_script:
+    - rm -f ${PWD}/.kubeconfig
+
+deploy dev:
+  tags:
+    - docker
+    - htz
+  stage: deploy
+  image: ictu/sshpass:latest
+  environment:
+    name: DEV
+    url: https://front3.tap.fairyland.world
+    action: start
+  rules:
+    - if: $CI_COMMIT_BRANCH == "test" && $CI_PIPELINE_SOURCE == "push"
+      when: always
+  script:
+    - sshpass -p ${DEV_SSH_PASS} ssh -o StrictHostKeyChecking=no root@92.255.79.84 "cd /root/tap && /root/tap/update.sh"
+
+deploy test:
+  stage: deploy
+  tags:
+    - test
+    - shell
+  needs:
+    - job: test FRONT
+      optional: true
+    - build front test
+    - build fpm
+    - build nginx-fpm
+    - build ton
+  resource_group: test
+  variables:
+    TEST_ENV: /.*test-1 deploy.*/
+  environment:
+    name: test
+    url: https://front.test.mmbump.pro
+  rules:
+    - !reference [.rules_develop_test_run]
+    - !reference [.rules_develop_manual]
+  before_script:
+    - !reference [.script_before_docker_login]
+    - !reference [.script_before_docker_version]
+  script:
+    - docker compose --file ./ci/docker-compose.test1.yaml up -d --wait
+    - docker exec php-fpm php artisan app:deploy_test
+
+deploy test2:
+  stage: deploy
+  tags:
+    - test
+    - shell
+  needs:
+    - job: test FRONT
+      optional: true
+    - build front test2
+    - build fpm
+    - build nginx-fpm
+    - build ton
+  resource_group: test2
+  environment:
+    name: test2
+    url: https://front.test2.mmbump.pro
+  variables:
+    TEST_ENV: /.*test-2 deploy.*/
+  rules:
+    - !reference [.rules_develop_test_run]
+    - !reference [.rules_develop_manual]
+  before_script:
+    - !reference [.script_before_docker_login]
+    - !reference [.script_before_docker_version]
+  script:
+    - docker compose --file ./ci/docker-compose.test2.yaml up -d --wait
+    - docker exec php-fpm2 php artisan app:deploy_test2
+
+deploy stage:
+  stage: deploy
+  tags:
+    - stage
+    - shell
+  needs:
+    - build front stage
+    - build fpm
+    - build nginx-fpm
+    - build ton
+  resource_group: stage
+  variables:
+     TEST_ENV: /.*stage deploy.*/
+  environment:
+    name: stage
+    url: https://front.stage.mmbump.pro
+    action: start
+  rules:
+    - !reference [.rules_develop_test_run]
+    - !reference [.rules_develop_manual]
+  before_script:
+    - !reference [.script_before_docker_login]
+    - !reference [.script_before_docker_version]
+  script:
+    - docker compose --file ./ci/docker-compose.stage.yaml --profile deploy up -d --wait
+    - docker exec php-fpm php artisan app:deploy_stage
+
+deploy prod manual:
+  tags:
+    - docker
+    - htz
+  stage: deploy
+  image: "ghcr.io/helmfile/helmfile:v0.165.0"
+  resource_group: production
+  environment:
+    name: production
+    url: https://mmbump.pro
+    action: start
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
+  before_script:
+    - echo $KUBECONFIG | base64 -d > ${PWD}/.kubeconfig
+    - export KUBECONFIG=${PWD}/.kubeconfig
+  script:
+    - helmfile apply -f ./ci/helmfile.yaml -e manual --wait
+  after_script:
+    - rm -f ${PWD}/.kubeconfig
+
+cleanup test:
+  stage: cleanup
+  tags:
+    - test
+    - shell
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $RESTORE_FROM_PROD == "no"'
+      when: always
+  script:
+    - docker system prune -af --volumes
+
+cleanup stage:
+  stage: cleanup
+  tags:
+    - stage
+    - shell
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $RESTORE_FROM_PROD == "no"'
+      when: always
+  script:
+    - docker system prune -af --volumes
+
+cleanup main htz:
+  stage: cleanup
+  tags:
+    - htz
+    - shell
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $RESTORE_FROM_PROD == "no"'
+      when: always
+  script:
+    - docker system prune -af --volumes
+
+restore db to stage:
+  stage: restore
+  timeout: 15 hours
+  resource_group: restore
+  tags:
+    - stage
+    - shell
+  allow_failure: true
+  rules:
+    - if: '$RESTORE_FROM_PROD == "yes" && $CI_PIPELINE_SOURCE == "schedule"'
+      when: always
+    - when: never
+  script:
+    - docker compose --file ./ci/docker-compose.stage.yaml --profile migrate up --build mysql-download  --exit-code-from mysql-download
+    - docker compose --file ./ci/docker-compose.stage.yaml restart php-fpm php-fpm-loop
