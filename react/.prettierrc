@@ -1,0 +1,14 @@
+{
+  "singleQuote": true,
+  "plugins": ["prettier-plugin-css-order", "@trivago/prettier-plugin-sort-imports"],
+  "importOrder": [
+    "^[a-z]|^@[a-z]",
+    "^@/assets/(.*)$",
+    "^@/components/(.*)$",
+    "^@/mobx/(.*)$",
+    "^@/widgets/(.*)$",
+    "<THIRD_PARTY_MODULES>"
+  ],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true
+}
