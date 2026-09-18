@@ -1,0 +1,87 @@
+@startuml Staking Flow
+
+' Стилизация как в новой диаграмме
+skinparam backgroundColor white
+skinparam handwritten false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam roundcorner 5
+skinparam padding 5
+skinparam sequence {
+    ArrowColor #2C3E50
+    ActorBorderColor #2C3E50
+    LifeLineBorderColor #2C3E50
+    LifeLineBackgroundColor #FFFFFF
+    ParticipantBorderColor #2C3E50
+    ParticipantBackgroundColor #FFFFFF
+    BoxBorderColor #2C3E50
+    BoxBackgroundColor #FFFFFF
+    NoteBorderColor #2C3E50
+    NoteBackgroundColor #FFFFFF
+    GroupBorderColor #2C3E50
+    GroupBackgroundColor #FFFFFF
+}
+
+actor Пользователь as User
+participant "Фронтенд\n(React)" as Frontend
+participant "Бэкенд\n(Laravel)" as Backend
+participant "TON Бэкенд\n(Express)" as TONBackend
+participant "StakeMaster\nКонтракт" as StakeMaster
+participant "Stake\nКонтракт" as Stake
+
+' Стейкинг токенов
+group Процесс стейкинга
+    User -> Frontend: Нажатие "Стейк токенов"
+    Frontend -> Backend: POST /lootboxes/stake\n{amount, duration, mint_count, max_claims}
+    Backend -> TONBackend: POST /stake\n{owner, amount, out_amount, mint_count, duration, max_claims}
+    TONBackend -> StakeMaster: TokenNotification\n{amount, forward_payload: Deposit}
+    StakeMaster -> Stake: Деплой нового Stake контракта\n{amount, out_amount, stake_time, mint_count, max_claims}
+    StakeMaster --> TONBackend: Адрес контракта
+    TONBackend --> Backend: {body, to, value}
+    Backend --> Frontend: Данные транзакции
+    Frontend -> User: Показать статус транзакции
+end
+
+' Клейм наград
+group Получение наград
+    User -> Frontend: Нажатие "Получить награду"
+    Frontend -> Backend: POST /lootboxes/claim\n{id}
+    Backend -> TONBackend: POST /claim\n{address, owner_address}
+    TONBackend -> Stake: Claim\n{query_id, owner_address, wallet_address}
+    Stake -> StakeMaster: DoMint\n{amount: out_amount, mint_count}
+    StakeMaster -> User: Отправка награды
+    StakeMaster --> TONBackend: Успех
+    TONBackend --> Backend: Статус транзакции
+    Backend --> Frontend: Обновление UI
+    Frontend -> User: Показать сообщение об успехе
+end
+
+' Рестейк
+group Рестейк
+    User -> Frontend: Нажатие "Рестейк"
+    Frontend -> Backend: POST /lootboxes/restake\n{id}
+    Backend -> TONBackend: POST /restake\n{address, owner_address}
+    TONBackend -> Stake: Restake\n{query_id}
+    Stake -> Stake: Сброс claims_count\nОбновление next_claim
+    Stake --> TONBackend: Успех
+    TONBackend --> Backend: Статус транзакции
+    Backend --> Frontend: Обновление UI
+    Frontend -> User: Показать сообщение об успехе
+end
+
+' Вывод стейка
+group Вывод стейка
+    User -> Frontend: Нажатие "Вывод"
+    Frontend -> Backend: POST /lootboxes/withdraw\n{id}
+    Backend -> TONBackend: POST /stake/withdraw\n{address, owner_address}
+    TONBackend -> Stake: Withdraw\n{query_id, wallet_address}
+    Stake -> StakeMaster: DoMint\n{amount: full_amount, mint_count: 0}
+    StakeMaster -> User: Отправка токенов
+    Stake -> Stake: Установка is_active = false
+    Stake --> TONBackend: Успех
+    TONBackend --> Backend: Статус транзакции
+    Backend --> Frontend: Обновление UI
+    Frontend -> User: Показать сообщение об успехе
+end
+
+@enduml

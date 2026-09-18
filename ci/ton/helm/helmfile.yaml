@@ -1,0 +1,9 @@
+releases:
+  - name: tap-ton
+    chart: ./
+    atomic: true
+    namespace: tap
+    createNamespace: true
+    cleanupOnFail: false
+    skipDeps: true
+    historyMax: 5

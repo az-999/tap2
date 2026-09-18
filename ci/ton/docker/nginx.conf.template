@@ -1,0 +1,22 @@
+server {
+    client_max_body_size 108M;
+
+    listen 3000 default_server;
+
+    root ${NGINX_ROOT_PATH};
+    index ${NGINX_INDEX_FILE};
+
+    location / {
+        root   ${NGINX_ROOT_PATH};
+        index  ${NGINX_INDEX_FILE};
+    }
+
+}
+server {
+    listen 8080;
+    listen [::1]:8080;
+    location /nginx_status {
+        stub_status on;
+        access_log off;
+    }
+}

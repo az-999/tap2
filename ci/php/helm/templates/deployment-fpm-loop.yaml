@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tap-php.fullname" . }}-fpm-loop
+  labels:
+    {{- include "tap-php.labels" . | nindent 4 }}
+    app: php-fpm-loop
+spec:
+  replicas: {{ .Values.fpm.loop.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "tap-php.selectorLabels" . | nindent 6 }}
+      app: php-fpm-loop
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "tap-php.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        app: php-fpm-loop
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "tap-php.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: fpm
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- if .Values.tag }}
+          image: "{{ .Values.fpm.image.repository }}:{{ .Values.tag }}"
+          {{- else }}
+          image: "{{ .Values.fpm.image.repository }}:{{ .Values.fpm.image.tag | default .Chart.AppVersion }}"
+          {{- end }}
+          imagePullPolicy: {{ .Values.fpm.image.pullPolicy }}
+          command:
+            - /entrypoint-loop.sh
+          ports:
+{{ toYaml .Values.fpm.ports | indent 12 }}
+          {{- if or .Values.fpm.customSecrets .Values.fpm.env }}
+          env:
+          {{- with  .Values.fpm.customSecrets }}
+{{ toYaml . | indent 12 }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.fpm.env }}
+          {{- toYaml .Values.fpm.env | nindent 12 }}
+          {{- end }}
+          envFrom:
+            - secretRef:
+                name: {{ include "tap-php.fullname" . }}-env-fpm
+          {{- if eq .Values.mysql.source "secret" }}
+            - secretRef:
+                name: {{ .Values.mysql.secretName }}
+          {{- end }}
+          {{- if eq .Values.mysql_log.source "secret" }}
+            - secretRef:
+                name: {{ .Values.mysql_log.secretName }}
+          {{- end }}
+          {{- if .Values.fpm.envFrom }}
+          {{- toYaml .Values.fpm.envFrom | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.fpm.resources | nindent 12 }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.fpm.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.fpm.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.fpm.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,12 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "tap-front.fullname" . }}
+  labels:
+    {{- include "tap-front.labels" . | nindent 4 }}
+spec:
+  maxUnavailable: 2
+  selector:
+    matchLabels:
+      {{- include "tap-front.selectorLabels" . | nindent 6 }}
+      app: tap-front

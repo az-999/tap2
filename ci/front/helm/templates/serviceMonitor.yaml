@@ -1,0 +1,16 @@
+{{- if .Values.monitoring.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: tap-front-metrics
+  labels:
+    {{- include "tap-front.labels" . | nindent 4 }}
+    app: tap-front
+spec:
+  selector:
+    matchLabels:
+      {{- include "tap-front.labels" . | nindent 6 }}
+  endpoints:
+  - port: metrics
+    interval: "10s"
+{{- end }}

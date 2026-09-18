@@ -1,0 +1,33 @@
+{{- if .Values.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "tap-front.fullname" . }}
+  labels:
+    {{- include "tap-front.labels" . | nindent 4 }}
+  annotations:
+    metric-config.external.prometheus-query.prometheus/nginx_http_requests_total: |
+      ceil(max(rate(nginx_http_requests_total{job="{{ include "tap-front.fullname" . }}",namespace="{{ .Release.Namespace}}"}[30s])))
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "tap-front.fullname" . }}
+  minReplicas: {{ .Values.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+  {{- if .Values.autoscaling.behavior }}
+  behavior:
+    {{- toYaml .Values.autoscaling.behavior | nindent 4 }}
+  {{- end }}
+  metrics:
+  - type: External
+    external:
+      metric:
+        name: prometheus-query
+        selector:
+          matchLabels:
+            query-name: nginx_http_requests_total
+      target:
+        type: Value
+        value: "{{ .Values.autoscaling.value }}"
+{{- end }}

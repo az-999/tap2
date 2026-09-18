@@ -1,0 +1,83 @@
+{{- if .Values.cronJob.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "tap-ton.fullname" . }}-{{ .Values.cronJob.name }}
+  labels:
+    {{- include "tap-ton.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.cronJob.schedule }}
+  successfulJobsHistoryLimit: {{ .Values.cronJob.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.cronJob.failedJobsHistoryLimit }}
+  concurrencyPolicy: {{ .Values.cronJob.concurrencyPolicy }}
+  jobTemplate:
+    spec:
+      backoffLimit: 4
+      template:
+        metadata:
+          labels:
+            {{- include "tap-ton.labels" . | nindent 14 }}
+        spec:
+          restartPolicy: OnFailure
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+          {{- toYaml . | nindent 14 }}
+          {{- end }}
+          serviceAccountName: {{ include "tap-ton.serviceAccountName" . }}
+          securityContext:
+            {{- toYaml .Values.podSecurityContext | nindent 14 }}
+          containers:
+            - name: {{ .Values.cronJob.name }}
+              securityContext:
+                {{- toYaml .Values.securityContext | nindent 16 }}
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              {{- with .Values.cronJob.args }}
+              args:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              {{- if .Values.customSecrets }}
+              env:
+              {{- with .Values.customSecrets }}
+    {{ toYaml . | indent 12 }}
+              {{- end }}
+              {{- end }}
+              envFrom:
+                - secretRef:
+                    name: {{ include "tap-ton.fullname" . }}-env
+              {{- with .Values.envFrom }}
+                {{- toYaml . | nindent 16 -}}
+              {{- end }}
+              ports:
+                - name: http
+                  containerPort: {{ .Values.service.port }}
+                  protocol: TCP
+              livenessProbe:
+                {{- toYaml .Values.livenessProbe | nindent 16 }}
+              startupProbe:
+                {{- toYaml .Values.startupProbe | nindent 16 }}
+              readinessProbe:
+                {{- toYaml .Values.readinessProbe | nindent 16 }}
+              resources:
+                {{- toYaml .Values.resources | nindent 16 }}
+              {{- with .Values.volumeMounts }}
+              volumeMounts:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+          {{- with .Values.volumes }}
+          volumes:
+            {{- toYaml . | nindent 14 }}
+          {{- end }}
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 14 }}
+          {{- end }}
+          {{- with .Values.affinity }}
+          affinity:
+            {{- toYaml . | nindent 14 }}
+          {{- end }}
+          {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 14 }}
+          {{- end }}
+{{- end }}

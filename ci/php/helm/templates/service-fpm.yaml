@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tap-php.fullname" . }}-fpm
+  labels:
+    {{- include "tap-php.labels" . | nindent 4 }}
+    app: php-fpm
+spec:
+  type: {{ .Values.fpm.service.type }}
+  ports:
+    - port: {{ .Values.fpm.service.port }}
+      targetPort: fpm
+      protocol: TCP
+      name: http
+{{- if and .Values.metrics.enabled  .Values.metrics.fpm.enabled }}
+    - port: {{ .Values.metrics.fpm.port }}
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+{{- end }}
+  selector:
+    {{- include "tap-php.selectorLabels" . | nindent 4 }}
+    app: php-fpm
+{{- if and .Values.metrics.enabled .Values.metrics.fpm.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tap-php.fullname" . }}-fpm-loop
+  labels:
+    {{- include "tap-php.labels" . | nindent 4 }}
+    app: php-fpm-loop
+spec:
+  type: {{ .Values.fpm.service.type }}
+  ports:
+    - port: {{ .Values.metrics.fpm.port }}
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+  selector:
+    {{- include "tap-php.selectorLabels" . | nindent 4 }}
+    app: php-fpm-loop
+{{- end }}

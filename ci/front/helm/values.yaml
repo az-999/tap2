@@ -1,0 +1,184 @@
+# Default values for tap-front.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: registry.gitlab.com/mmpro1/tap/react
+  pullPolicy: IfNotPresent
+  tag: "develop"
+
+imagePullSecrets:
+  - name: docker
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 3000
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+  hosts:
+    - host: mmbump.pro
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - mmbump.pro
+      secretName: le-mmbump-pro
+
+ingress2:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+  hosts:
+    - host: bumpstore.app
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - bumpstore.app
+      secretName: le-bumpstore-app
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 300m
+    memory: 128Mi
+
+livenessProbe:
+  successThreshold: 1
+  httpGet:
+    path: /health
+    port: http
+  failureThreshold: 5
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  failureThreshold: 1
+  periodSeconds: 10
+
+startupProbe:
+  successThreshold: 1
+  initialDelaySeconds: 20
+  httpGet:
+    path: /health
+    port: http
+  failureThreshold: 30
+  periodSeconds: 10
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 5
+  value: "95"
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 30
+volumeMounts:
+  - name: env-json
+    mountPath: "/application/env.json"
+    subPath: env.json
+    readOnly: true
+volumes:
+  - name: env-json
+    secret:
+      secretName: "{{ include \"tap-front.fullname\" . }}-json"
+
+nodeSelector:
+  k8s.scaleway.com/type: worker
+tolerations: []
+
+affinity: {}
+
+env:
+  REACT_APP_PROD_MODE: true
+  REACT_APP_API_URL: https://api.mmbump.pro
+  REACT_APP_WSS_URL: wss://dev8.usmykyta.pro/connection/websocket
+  REACT_APP_TON_API_URL: https://tonapi.io/v2
+  REACT_APP_TAP_TONAPI_URL: https://apiton.mmbump.pro
+  REACT_APP_TRANSACTION_NFT_LIFE_TIME: 600
+  REACT_APP_APITON_URL: https://apiton.mmbump.pro
+
+monitoring:
+  enabled: true
+
+  port: 9113
+  image:
+    repository: nginx/nginx-prometheus-exporter
+    pullPolicy: IfNotPresent
+    tag: 1.1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+purgeJob:
+  enabled: true
+  image: curlimages/curl:8.9.1
+  command:
+    - sh
+    - -c
+    - |-
+      curl --request POST \
+      --url https://api.cloudflare.com/client/v4/zones/${CF_ZONE_ID}/purge_cache \
+      --header "Content-Type: application/json" \
+      --header "Authorization: Bearer ${CLOUDFLARE_TOKEN}" \
+      --data '{"purge_everything": true}'
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+  envFrom:
+    - secretRef:
+        name: purge-token
+  volumeMounts: []
+  volumes: []

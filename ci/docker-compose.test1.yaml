@@ -1,0 +1,199 @@
+version: "3.5"
+
+services:
+  memcached:
+    image: memcached:alpine
+    restart: always
+    container_name: memcached
+    ports:
+      - "11211:11211"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    links:
+      - mysql
+    depends_on:
+      - mysql
+    ports:
+      - "127.0.0.1:8081:80"
+    environment:
+      PMA_HOST: mysql
+
+  mysql:
+    image: mysql:8.0
+    command: "--default-authentication-plugin=mysql_native_password --skip-log-bin"
+    container_name: mysql
+    restart: always
+    volumes:
+      - /home/develop/mysql:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=tap
+
+  mysql-log:
+    image: mysql:8.0
+    command: "--default-authentication-plugin=mysql_native_password --skip-log-bin"
+    container_name: mysql_log
+    restart: always
+    volumes:
+      - /home/develop/mysql-log:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=tap-log
+
+  front:
+    image: ${FRONT_IMAGE}:${VERSION}
+    container_name: front
+    ports:
+      - 8082:3000
+    environment:
+      - REACT_APP_MODE=test
+      - REACT_APP_API_URL=https://api.test.mmbump.pro
+      - REACT_APP_WSS_URL=wss://dev8.usmykyta.pro/connection/websocket
+      - REACT_APP_TON_API_URL=https://tonapi.io/v2
+      - REACT_APP_TAP_TONAPI_URL=https://apiton.test.mmbump.pro
+      - REACT_APP_TRANSACTION_NFT_LIFE_TIME=600
+      - REACT_APP_FARMING_PERIOD=30
+      - REACT_APP_APITON_URL=https://apiton.test.mmbump.pro
+      - REACT_APP_BOT_USERNAME=mmbump_test_bot
+      - REACT_APP_WEB_URL=https://front.test.bumpstore.app
+      - REACT_APP_WEB_TEST_URL=https://front.test.bumpstore.app
+      - REACT_APP_TELEGRAM_TEST_URL=https://front.test.mmbump.pro
+      - REACT_APP_WEB_PROD_URL=https://bumpstore.app
+      - REACT_APP_TELEGRAM_PROD_URL=https://mmbump.pro
+
+  ton:
+    image: ${TON_IMAGE}:${VERSION}
+    container_name: ton
+    ports:
+      - 8083:3000
+    environment:
+      - API_URL=https://api.test.mmbump.pro
+      - JWT_SECRET=15BVK0mpY21qoH98l7BvE1XiUR132Avubg0tmxm8HThTfnVpUxCkFpuiVGZttdf3
+      - COLLECTION_ADDRESS_NFT1=EQBqqjvW9DKAinL7eKie6ScozUWCu4Z0Uod5abtrbql58q_E
+      - COLLECTION_ADDRESS_NFT2=EQCTwN6lQNicNIVJPga9d2FCS2DdAvvQb8vFD1eS4_dcv_RZ
+      - COLLECTION_ADDRESS_NFT3=EQCamaf-BiHae4rtNcc2UK-vCsHguu1PkQ3Odq1DllwCsjPb
+      - COLLECTION_ADDRESS_NFT4=EQCWobuqCICbdaDlhm1L-55PC9UwynLPs8Xurs-EwjKeX-xM
+      - COLLECTION_ADDRESS_NFT5=EQDJXfeotxIQBbcpMFGyFyBSxQBTl6Kaljr8y3mQUJ8oG5mZ
+      - MARKETPLACE_ADDRESS=EQAJ-QU4xFrQRr1JCtQS7zAgCOvVDl5tkBvgwbAGOGiRd9MO
+      - OWNER_CONTRACT_MNEMONIC=awful mass seek grace man claim asthma wide coconut wage mimic woman style orbit pencil case rug define window speak piece black like buffalo
+      - NETWORK=mainnet
+      - BACKEND_TOKEN=e66852fdd3a7cadf263bc5d967e89332
+      - KRAFT_SEED_KEY=2l7pvE1XiUR1WGAviGpBVK0mFY21qok5
+
+  php-fpm:
+    container_name: php-fpm
+    depends_on:
+      - mysql
+      - mysql-log
+      - memcached
+    image: ${FPM_IMAGE}:${VERSION}
+    ports:
+      - 9000:9000
+    links:
+      - mysql
+      - mysql-log
+      - memcached
+    command:
+      - /bin/bash
+      - -c
+      - |
+        /usr/bin/php8.1 artisan migrate && /usr/sbin/php-fpm8.1 -O
+
+    environment:
+      - APP_NAME=Laravel
+      - APP_ENV=test
+      - APP_KEY=base64:eUituHpDxJR07EFiv22czM8CEQ/HaSkFjKGuSAWNHSU=
+      - APP_DEBUG=true
+      - APP_URL=https://api.test.mmbump.pro
+      - APP_FRONT_URL=https://front.test.mmbump.pro
+      - DB_WRITE_HOST=mysql
+      - DB_READ_HOST_LIST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=tap
+      - DB_USERNAME=root
+      - DB_PASSWORD=password
+      - DB_LOG_WRITE_HOST=mysql-log
+      - DB_LOG_READ_HOST_LIST=mysql-log
+      - DB_LOG_PORT=3306
+      - DB_LOG_DATABASE=tap-log
+      - DB_LOG_USERNAME=root
+      - DB_LOG_PASSWORD=password
+      - SESSION_DRIVER=memcached
+      - LOG_CHANNEL=stderr
+      - MEMCACHED_HOST=memcached
+      - TELEGRAM_BOT_TOKEN=7114012929:AAGLC0eS14fVdy6k6Hv2iCTFMfmFkhq5MdU
+      - TELEGRAM_NAME=mmbump_test_bot
+      - CORS_URL=*
+      - BOT_FARMING_LENGTH=300
+      - JWT_SECRET=15BVK0mpY21qoH98l7BvE1XiUR132Avubg0tmxm8HThTfnVpUxCkFpuiVGZttdf3
+      - APP_NFT_TOKEN=e66852fdd3a7cadf263bc5d967e89332
+#      - APP_WALLET=EQDSni3H4D2iR7ZNU7nxWNm0vLFAAyw7XRD9eEnbM2CElIHE
+      - APP_NFT_PRICE=80000000
+      - APP_NFT_URL=https://apiton.test.mmbump.pro
+      - REQ_SIGN_KEY=super-key
+
+  php-fpm-loop:
+    container_name: php-fpm-loop
+    depends_on:
+      - mysql
+      - mysql-log
+      - memcached
+    image: ${FPM_IMAGE}:${VERSION}
+    links:
+      - mysql
+      - mysql-log
+      - memcached
+    command:
+      - /entrypoint-loop.sh
+    environment:
+      - APP_NAME=Laravel
+      - APP_ENV=test
+      - APP_KEY=base64:eUituHpDxJR07EFiv22czM8CEQ/HaSkFjKGuSAWNHSU=
+      - APP_DEBUG=true
+      - APP_URL=https://api.test.mmbump.pro
+      - APP_FRONT_URL=https://front.test.mmbump.pro
+      - DB_WRITE_HOST=mysql
+      - DB_READ_HOST_LIST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=tap
+      - DB_USERNAME=root
+      - DB_PASSWORD=password
+      - DB_LOG_WRITE_HOST=mysql-log
+      - DB_LOG_READ_HOST_LIST=mysql-log
+      - DB_LOG_PORT=3306
+      - DB_LOG_DATABASE=tap-log
+      - DB_LOG_USERNAME=root
+      - DB_LOG_PASSWORD=password
+      - SESSION_DRIVER=memcached
+      - LOG_CHANNEL=stderr
+      - MEMCACHED_HOST=memcached
+      - TELEGRAM_BOT_TOKEN=7114012929:AAGLC0eS14fVdy6k6Hv2iCTFMfmFkhq5MdU
+      - TELEGRAM_NAME=mmbump_test_bot
+      - CORS_URL=*
+      - BOT_FARMING_LENGTH=300
+      - JWT_SECRET=15BVK0mpY21qoH98l7BvE1XiUR132Avubg0tmxm8HThTfnVpUxCkFpuiVGZttdf3
+      - APP_NFT_TOKEN=e66852fdd3a7cadf263bc5d967e89332
+#      - APP_WALLET=EQDSni3H4D2iR7ZNU7nxWNm0vLFAAyw7XRD9eEnbM2CElIHE
+      - APP_NFT_PRICE=80000000
+      - APP_NFT_URL=https://apiton.test.mmbump.pro
+      - REQ_SIGN_KEY=super-key
+
+  php-nginx:
+    container_name: php-nginx
+    depends_on:
+      - php-fpm
+    image: ${NGINX_IMAGE}:${VERSION}
+    ports:
+      - 8080:80
+    links:
+      - php-fpm
+    environment:
+      - PHP_HOST=php-fpm
+      - NGINX_RESOLVER=127.0.0.11

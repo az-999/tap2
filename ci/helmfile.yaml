@@ -1,0 +1,55 @@
+environments:
+  default:
+    values:
+      - ton_tag: develop
+      - php_tag: develop
+      - front_tag: develop
+  manual:
+    values:
+      - ton_tag: '{{ env "TON_VERSION" }}'
+      - php_tag: '{{ env "PHP_VERSION" }}'
+      - front_tag: '{{ env "FRONT_VERSION" }}'
+  prod:
+    values:
+      - ton_tag: '{{ env "CI_COMMIT_TAG" }}'
+      - php_tag: '{{ env "CI_COMMIT_TAG" }}'
+      - front_tag: '{{ env "CI_COMMIT_TAG" }}'
+---
+releases:
+  - name: tap-ton
+    chart: ./ton/helm/
+    atomic: true
+    namespace: tap
+    createNamespace: true
+    cleanupOnFail: false
+    skipDeps: true
+    historyMax: 5
+    values:
+      - image:
+          tag: '{{ .Environment.Values.ton_tag }}'
+  - name: tap-php
+    chart: ./php/helm/
+    atomic: false
+    namespace: tap
+    createNamespace: true
+    cleanupOnFail: false
+    skipDeps: true
+    historyMax: 5
+    values:
+      - nginx:
+          image:
+            tag: '{{ .Environment.Values.ton_tag }}'
+      - fpm:
+          image:
+            tag: '{{ .Environment.Values.ton_tag }}'
+  - name: tap-front
+    chart: ./front/helm
+    atomic: false
+    namespace: tap
+    createNamespace: true
+    cleanupOnFail: false
+    skipDeps: true
+    historyMax: 5
+    values:
+      - image:
+          tag: '{{ .Environment.Values.front_tag }}'

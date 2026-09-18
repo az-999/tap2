@@ -1,0 +1,86 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "tap-php.fullname" . }}-fpm-deploy
+  labels:
+    {{- include "tap-php.labels" . | nindent 4 }}
+    app: php-fpm-deploy
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: 4
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "tap-php.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        app: php-fpm-deploy
+    spec:
+      restartPolicy: OnFailure
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "tap-php.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: migrate-php
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- if .Values.tag }}
+          image: "{{ .Values.fpm.image.repository }}:{{ .Values.tag }}"
+          {{- else }}
+          image: "{{ .Values.fpm.image.repository }}:{{ .Values.fpm.image.tag | default .Chart.AppVersion }}"
+          {{- end }}
+          imagePullPolicy: {{ .Values.fpm.image.pullPolicy }}
+          {{- if or .Values.fpm.customSecrets .Values.fpm.env }}
+          env:
+          {{- with  .Values.fpm.customSecrets }}
+{{ toYaml . | indent 12 }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.fpm.env }}
+          {{- toYaml .Values.fpm.env | nindent 12 }}
+          {{- end }}
+          envFrom:
+            - secretRef:
+                name: {{ include "tap-php.fullname" . }}-env-fpm
+          {{- if eq .Values.mysql.source "secret" }}
+            - secretRef:
+                name: {{ .Values.mysql.secretName }}
+          {{- end }}
+          {{- if .Values.fpm.envFrom }}
+          {{- toYaml .Values.fpm.envFrom | nindent 12 }}
+          {{- end }}
+          args:
+            - /usr/bin/php8.1
+            - artisan
+            - app:deploy_prod
+          {{- if .Values.fpm.resources }}
+          resources:
+            {{- toYaml .Values.fpm.resources | nindent 12 }}
+      {{- end }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.fpm.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.fpm.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.fpm.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

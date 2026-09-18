@@ -1,0 +1,36 @@
+{{- if .Values.fpm.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "tap-php.fullname" . }}-fpm
+  labels:
+    {{- include "tap-php.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "tap-php.fullname" . }}-fpm
+  minReplicas: {{ .Values.fpm.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.fpm.autoscaling.maxReplicas }}
+{{- if .Values.fpm.autoscaling.behavior }}
+  behavior:
+    {{- toYaml .Values.fpm.autoscaling.behavior | nindent 4 }}
+{{- end }}
+  metrics:
+    {{- if .Values.fpm.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.fpm.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.fpm.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.fpm.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}

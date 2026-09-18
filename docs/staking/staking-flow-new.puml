@@ -1,0 +1,132 @@
+@startuml Staking Flow
+
+scale max 1024 width
+
+' Стилизация как в старой диаграмме
+skinparam backgroundColor white
+skinparam handwritten false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam roundcorner 5
+skinparam padding 5
+skinparam sequence {
+    ArrowColor #2C3E50
+    ActorBorderColor #2C3E50
+    LifeLineBorderColor #2C3E50
+    LifeLineBackgroundColor #FFFFFF
+    ParticipantBorderColor #2C3E50
+    ParticipantBackgroundColor #FFFFFF
+    BoxBorderColor #2C3E50
+    BoxBackgroundColor #FFFFFF
+    NoteBorderColor #2C3E50
+    NoteBackgroundColor #FFFFFF
+    GroupBorderColor #2C3E50
+    GroupBackgroundColor #FFFFFF
+}
+
+actor Пользователь as User
+participant "Фронтенд\n(React)" as Frontend
+participant "Бэкенд\n(Laravel)" as Backend
+participant "TON Бэкенд\n(Express)" as TONBackend
+participant "StakeMaster\nКонтракт" as StakeMaster
+participant "NFT\nКонтракт" as NFT
+
+== Инициализация ==
+note over StakeMaster, NFT
+  **Последовательность действий:**
+  1. Деплой StakeMaster контракта
+  2. Установка StakeMaster как minter в NFT контракте
+  3. Импорт данных о старых стейках в StakeMaster через AddOldStakeRecord
+end note
+
+== Процесс нового стейка ==
+User -> Frontend ++: Нажатие "Стейк"\n{amount, duration, mint_count, max_claims}
+Frontend -> Backend ++: Запрос на стейк\n{amount, duration, mint_count, max_claims}
+Backend -> StakeMaster ++: Deposit\n{owner, amount, out_amount, mint_count, duration, max_claims}
+StakeMaster -> NFT ++: Минт NFT\n{owner, stake_time, mint_count, max_claims}
+return NFT создан\n{tokenId, owner}
+return Стейк создан\n{address, owner}
+return Успех\n{body, to, value}
+return Показать успех
+
+== Процесс клейма старого стейка ==
+User -> Frontend ++: Нажатие "Клейм"\n(старый стейк)\n{id, owner_address}
+Frontend -> Backend ++: Запрос на клейм\n{id, owner_address}
+Backend -> StakeMaster ++: ClaimOldStake\n{query_id, owner_address, wallet_address}
+note over StakeMaster
+  1. Поиск записи стейка в oldStakeRecords
+  2. Проверка времени последнего клейма
+  3. Расчет награды на основе старых параметров
+end note
+StakeMaster -> User: Отправка реварда\n{amount: out_amount}
+StakeMaster -> NFT ++: Минт NFT\n{owner, stake_time, mint_count}
+return NFT создан\n{tokenId, owner}
+return Клейм обработан\n{status: success}
+return Успех\n{body, to, value}
+return Показать успех
+
+== Процесс клейма нового стейка ==
+User -> Frontend ++: Нажатие "Клейм"\n(новый стейк)\n{id, owner_address}
+Frontend -> Backend ++: Запрос на клейм\n{id, owner_address}
+Backend -> StakeMaster ++: Claim\n{query_id, owner_address, wallet_address}
+note over StakeMaster
+  1. Получение данных из состояния контракта
+  2. Проверка времени последнего клейма
+  3. Расчет награды на основе текущих параметров
+end note
+StakeMaster -> User: Отправка реварда\n{amount: out_amount}
+StakeMaster -> NFT ++: Минт NFT\n{owner, stake_time, mint_count}
+return NFT создан\n{tokenId, owner}
+return Клейм обработан\n{status: success}
+return Успех\n{body, to, value}
+return Показать успех
+
+== Процесс рестейка ==
+User -> Frontend ++: Нажатие "Рестейк"\n{id, owner_address}
+Frontend -> Backend ++: Запрос на рестейк\n{id, owner_address}
+alt Старый стейк
+Backend -> StakeMaster ++: RestakeOldStake\n{query_id, owner_address}
+note over StakeMaster
+  1. Поиск записи стейка в oldStakeRecords
+  2. Сброс счетчика клеймов
+  3. Обновление времени следующего клейма
+end note
+return Рестейк обработан\n{status: success}
+else Новый стейк
+Backend -> StakeMaster ++: Restake\n{query_id, owner_address}
+note over StakeMaster
+  1. Обновление состояния в контракте
+  2. Сброс счетчика клеймов
+  3. Обновление времени следующего клейма
+end note
+return Рестейк обработан\n{status: success}
+end
+return Успех\n{body, to, value}
+return Показать успех
+
+== Процесс вывода ==
+User -> Frontend ++: Нажатие "Вывод"\n{id, owner_address}
+Frontend -> Backend ++: Запрос на вывод\n{id, owner_address}
+alt Старый стейк
+Backend -> StakeMaster ++: WithdrawOldStake\n{query_id, owner_address, wallet_address}
+note over StakeMaster
+  1. Поиск записи стейка в oldStakeRecords
+  2. Проверка возможности вывода
+  3. Удаление записи из oldStakeRecords
+end note
+StakeMaster -> User: Отправка токенов\n{amount: full_amount}
+return Вывод обработан\n{status: success}
+else Новый стейк
+Backend -> StakeMaster ++: Withdraw\n{query_id, owner_address, wallet_address}
+note over StakeMaster
+  1. Получение данных из состояния контракта
+  2. Проверка возможности вывода
+  3. Деактивация стейка в контракте
+end note
+StakeMaster -> User: Отправка токенов\n{amount: full_amount}
+return Вывод обработан\n{status: success}
+end
+return Успех\n{body, to, value}
+return Показать успех
+
+@enduml

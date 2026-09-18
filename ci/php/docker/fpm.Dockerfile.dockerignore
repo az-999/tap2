@@ -1,0 +1,4 @@
+*
+!ci/php/docker
+!version.json
+!laravel

@@ -1,0 +1,9 @@
+releases:
+  - name: tap-front
+    chart: ./
+    atomic: false
+    namespace: tap
+    createNamespace: true
+    cleanupOnFail: false
+    skipDeps: true
+    historyMax: 5

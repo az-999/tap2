@@ -1,0 +1,68 @@
+cat > /tmp/get_stakes.php << 'EOL'
+<?php
+require __DIR__.'/../application/vendor/autoload.php';
+$app = require_once __DIR__.'/../application/bootstrap/app.php';
+$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel->bootstrap();
+
+use Illuminate\Support\Facades\DB;
+
+$stakes = DB::select("
+    SELECT * FROM stake 
+");
+
+foreach ($stakes as $stake) {
+    echo "Stake ID: {$stake->id}\n";
+    echo "Telegram ID: {$stake->tg_id}\n";
+    echo "Lootbox ID: {$stake->lootbox_id}\n";
+    echo "Owner: {$stake->owner}\n";
+    echo "Address: {$stake->address}\n";
+    echo "Amount: {$stake->amount}\n";
+    echo "Out Amount: {$stake->out_amount}\n";
+    echo "Mint Count: {$stake->mint_count}\n";
+    echo "Claims: {$stake->claims}/{$stake->max_claims}\n";
+    echo "Max Claims: {$stake->max_claims}\n";
+    echo "Duration: {$stake->duration}\n";
+    echo "Transaction ID: {$stake->txid}\n";
+    echo "Status: {$stake->status}\n";
+    echo "Created At: {$stake->created_at}\n";
+    echo "Next Claim: {$stake->next_claim}\n";
+    echo "Last Claim: {$stake->last_claim}\n";
+    echo "Finished At: {$stake->finished_at}\n";
+    echo "End Time: {$stake->end_time}\n";
+    echo "Error: {$stake->error}\n";
+    echo "------------------------\n";
+}
+EOL
+
+# Запускаем скрипт
+php /tmp/get_stakes.php
+
+Пример ответа:
+------------------------
+Stake ID: 387
+Telegram ID: 240761093
+Lootbox ID: 1
+Owner: UQDixNDppHr_M3gCyXzMB70mWoDEOIi-T0Jfhbye4leR47wa
+Address: 0:0623f63c58a225595f880f639f829eee1b0e4fccc0e9ce2ce03f4dcab78bbb8f
+Amount: 10
+Out Amount: 1
+Mint Count: 3
+Claims: 0/1
+Max Claims: 1
+Duration: 120
+Transaction ID: 44e8ac049afe432efd29b6d99f041bd15aaf29dc04296afbbd197ba40bbdf4f0
+Status: 1
+Created At: 1739821792
+Next Claim: 1739822001
+Last Claim: 0
+Finished At: 0
+End Time: 1739822301
+Error: 
+------------------------
+
+
+
+
+    WHERE status NOT IN (0, 2, 3)  -- Excluding STATUS_CREATED, STATUS_CLOSED, STATUS_ERROR
+    AND claims < max_claims

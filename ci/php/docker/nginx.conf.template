@@ -1,0 +1,35 @@
+resolver ${NGINX_RESOLVER};
+server {
+    client_max_body_size 108M;
+
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    root ${NGINX_ROOT_PATH};
+    index ${NGINX_INDEX_FILE};
+
+    if (!-e $request_filename) {
+        rewrite ^.*$ /${NGINX_INDEX_FILE} last;
+    }
+    access_log  /var/log/nginx/access.log  main;
+    error_log /var/log/nginx/error.log error;
+
+    location ~ \.php$ {
+        access_log  /var/log/nginx/access.log  main;
+        error_log /var/log/nginx/error.log error;
+        fastcgi_pass ${PHP_HOST}:${PHP_PORT};
+        fastcgi_index   ${NGINX_INDEX_FILE};
+        fastcgi_param   SCRIPT_FILENAME       $document_root$fastcgi_script_name;
+        fastcgi_buffers 16 16k;
+        fastcgi_buffer_size 32k;
+        include fastcgi_params;
+    }
+}
+server {
+    listen 8080;
+    listen [::1]:8080;
+    location /nginx_status {
+        stub_status on;
+        access_log off;
+    }
+}

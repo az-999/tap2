@@ -1,0 +1,68 @@
+@startuml Staking Flow
+
+actor User
+participant "Frontend\n(React)" as Frontend
+participant "Backend\n(Laravel)" as Backend
+participant "TON Backend\n(Express)" as TONBackend
+participant "StakeMaster\nContract" as StakeMaster
+participant "Stake\nContract" as Stake
+participant "Jetton\nWallet" as JettonWallet
+
+' Стейкинг токенов
+group Staking Process
+    User -> Frontend: Click "Stake Tokens"
+    Frontend -> Backend: POST /lootboxes/stake\n{amount, duration, mint_count, max_claims}
+    Backend -> TONBackend: POST /stake\n{owner, amount, out_amount, mint_count, duration, max_claims}
+    TONBackend -> StakeMaster: TokenNotification\n{amount, forward_payload: Deposit}
+    StakeMaster -> Stake: Deploy new Stake contract\n{amount, out_amount, stake_time, mint_count, max_claims}
+    StakeMaster --> TONBackend: Contract Address
+    TONBackend --> Backend: {body, to, value}
+    Backend --> Frontend: Transaction Data
+    Frontend -> User: Show Transaction Status
+end
+
+' Клейм наград
+group Claim Rewards
+    User -> Frontend: Click "Claim Reward"
+    Frontend -> Backend: POST /lootboxes/claim\n{id}
+    Backend -> TONBackend: POST /claim\n{address, owner_address}
+    TONBackend -> Stake: Claim\n{query_id, owner_address, wallet_address}
+    Stake -> StakeMaster: DoMint\n{amount: out_amount, mint_count}
+    StakeMaster -> JettonWallet: Transfer Tokens\n{amount: out_amount}
+    JettonWallet --> User: Receive Reward
+    StakeMaster --> TONBackend: Success
+    TONBackend --> Backend: Transaction Status
+    Backend --> Frontend: Update UI
+    Frontend -> User: Show Success Message
+end
+
+' Рестейк
+group Restake
+    User -> Frontend: Click "Restake"
+    Frontend -> Backend: POST /lootboxes/restake\n{id}
+    Backend -> TONBackend: POST /restake\n{address, owner_address}
+    TONBackend -> Stake: Restake\n{query_id}
+    Stake -> Stake: Reset claims_count\nUpdate next_claim
+    Stake --> TONBackend: Success
+    TONBackend --> Backend: Transaction Status
+    Backend --> Frontend: Update UI
+    Frontend -> User: Show Success Message
+end
+
+' Вывод стейка
+group Withdraw Stake
+    User -> Frontend: Click "Withdraw"
+    Frontend -> Backend: POST /lootboxes/withdraw\n{id}
+    Backend -> TONBackend: POST /stake/withdraw\n{address, owner_address}
+    TONBackend -> Stake: Withdraw\n{query_id, wallet_address}
+    Stake -> StakeMaster: DoMint\n{amount: full_amount, mint_count: 0}
+    StakeMaster -> JettonWallet: Transfer Tokens\n{amount: full_amount}
+    JettonWallet --> User: Receive Full Stake
+    Stake -> Stake: Set is_active = false
+    Stake --> TONBackend: Success
+    TONBackend --> Backend: Transaction Status
+    Backend --> Frontend: Update UI
+    Frontend -> User: Show Success Message
+end
+
+@enduml

@@ -1,0 +1,170 @@
+version: "3.5"
+
+services:
+  memcached:
+    profiles:
+      - deploy
+    image: memcached:alpine
+    restart: always
+    container_name: memcached
+    ports:
+      - "11211:11211"
+
+  phpmyadmin:
+    profiles:
+      - deploy
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    links:
+      - mysql-log
+    depends_on:
+      - mysql-log
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOSTS: mysql.stage.mmbump.pro,mysql-log
+
+  mysql-download:
+    profiles:
+      - migrate
+    build:
+      context: ./other
+      dockerfile: migrate/migrate.Dockerfile
+    working_dir: /application
+    env_file:
+      - /home/gitlab-runner/env.backup
+
+  mysql-log:
+    profiles:
+      - deploy
+    image: mysql:8.0
+    command: "--default-authentication-plugin=mysql_native_password --skip-log-bin"
+    container_name: mysql_log
+    restart: always
+    volumes:
+      - /home/develop/mysql-log:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=tap-log
+
+  front:
+    profiles:
+      - deploy
+    image: ${FRONT_IMAGE}:${VERSION}
+    container_name: front
+    ports:
+      - 8082:3000
+    volumes:
+      - /home/develop/env.json:/application.json
+
+  ton:
+    profiles:
+      - deploy
+    image: ${TON_IMAGE}:${VERSION}
+    container_name: ton
+    ports:
+      - 127.0.0.1:8083:3000
+    env_file:
+      - /home/develop/.env.ton
+    environment:
+      - API_URL=https://api.stage.mmbump.pro
+      - COLLECTION_ADDRESS_NFT1=EQC5XhGLN5wkEQcifzsiyOpPvDfAqLBzQwsfEEZVRS7LAxGJ
+      - COLLECTION_ADDRESS_NFT2=EQCLxOtUQ7ouyNdqnzxcGuChtqxcbLKqxRsRmUKsQZnjwhDb
+      - COLLECTION_ADDRESS_NFT3=EQDCU3jFPifA0MoptBDqyS4Td8TKuNN4Mw1N-AW_VGHKzzFK
+      - COLLECTION_ADDRESS_NFT4=EQD1NhcBmbVgNYFRMtlSDVdWcwQTmvV4YNkFSydD3FaOPQpw
+      - COLLECTION_ADDRESS_NFT5=EQCv9ZPdQ9LQrnlWbgQ7btD5qgyzi1uWqb9trgNmdSL1ei5l
+      - NETWORK=mainnet
+      - JWT_SECRET=GvBVK0mpY21qoH98l7BvE1XiUR1WOAvubg0tmxm8HThTfnVpUxCkFpuiVGZttPf0
+
+  php-fpm:
+    profiles:
+      - deploy
+    container_name: php-fpm
+    depends_on:
+      - mysql-log
+      - memcached
+    image: ${FPM_IMAGE}:${VERSION}
+    ports:
+      - 127.0.0.1:9000:9000
+    links:
+      - mysql-log
+      - memcached
+    command:
+      - /bin/bash
+      - -c
+      - |
+        /usr/bin/php8.1 artisan migrate && /usr/sbin/php-fpm8.1 -O
+    env_file:
+      - /home/develop/.env.php
+    environment:
+      - APP_DEBUG=false
+      - APP_ENV=stage
+      - APP_FRONT_URL=https://front.stage.mmbump.pro
+      - APP_KEY=base64:EeHWrIf3IEgTWGfkhwz+NRFS/Er0KJwBo2XxXCz25J0=
+      - APP_NAME=tap
+      - APP_NFT_URL=https://apiton.stage.mmbump.pro
+      - APP_URL=https://api.stage.mmbump.pro
+      - BOT_FARMING_LENGTH=21600
+      - CORS_URL=https://front.stage.mmbump.pro,https://front.stage.bumpstore.app,https://bumpstore.app
+      - DB_LOG_WRITE_HOST=mysql-log
+      - DB_LOG_READ_HOST_LIST=mysql-log
+      - DB_LOG_PORT=3306
+      - DB_LOG_DATABASE=tap-log
+      - DB_LOG_USERNAME=root
+      - DB_LOG_PASSWORD=password
+      - SESSION_DRIVER=memcached
+      - LOG_CHANNEL=stderr
+      - MEMCACHED_HOST=memcached
+
+  php-fpm-loop:
+    profiles:
+      - deploy
+    container_name: php-fpm-loop
+    depends_on:
+      - mysql-log
+      - memcached
+    image: ${FPM_IMAGE}:${VERSION}
+    links:
+      - mysql-log
+      - memcached
+    command:
+      - /entrypoint-loop.sh
+    env_file:
+      - /home/develop/.env.php
+    environment:
+      - APP_DEBUG=false
+      - APP_ENV=stage
+      - APP_FRONT_URL=https://front.stage.mmbump.pro
+      - APP_KEY=base64:EeHWrIf3IEgTWGfkhwz+NRFS/Er0KJwBo2XxXCz25J0=
+      - APP_NAME=tap
+      - APP_NFT_URL=https://apiton.stage.mmbump.pro
+      - APP_URL=https://api.stage.mmbump.pro
+      - BOT_FARMING_LENGTH=21600
+      - CORS_URL=https://front.stage.mmbump.pro,https://front.stage.bumpstore.app,https://bumpstore.app
+      - DB_LOG_WRITE_HOST=mysql-log
+      - DB_LOG_READ_HOST_LIST=mysql-log
+      - DB_LOG_PORT=3306
+      - DB_LOG_DATABASE=tap-log
+      - DB_LOG_USERNAME=root
+      - DB_LOG_PASSWORD=password
+      - SESSION_DRIVER=memcached
+      - LOG_CHANNEL=stderr
+      - MEMCACHED_HOST=memcached
+
+  php-nginx:
+    profiles:
+      - deploy
+    container_name: php-nginx
+    depends_on:
+      - php-fpm
+    image: ${NGINX_IMAGE}:${VERSION}
+    ports:
+      - 127.0.0.1:8080:80
+    links:
+      - php-fpm
+    environment:
+      - PHP_HOST=php-fpm
+      - NGINX_RESOLVER=127.0.0.11

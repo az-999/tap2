@@ -1,0 +1,345 @@
+# Default values for tap-php.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+nginx:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 10%
+      maxUnavailable: 2
+  replicaCount: 1
+  image:
+    repository: registry.gitlab.com/mmpro1/tap/nginx-fpm
+    pullPolicy: Always
+    tag: "develop"
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  livenessProbe:
+    httpGet:
+      path: /nginx_status
+      port: stub
+    failureThreshold: 5
+    periodSeconds: 10
+
+  readinessProbe:
+    httpGet:
+      path: /nginx_status
+      port: stub
+    failureThreshold: 1
+    periodSeconds: 10
+
+  startupProbe:
+    httpGet:
+      path: /nginx_status
+      port: stub
+    failureThreshold: 30
+    periodSeconds: 10
+
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 5
+    value: 99
+    behavior:
+      scaleDown:
+        policies:
+        - periodSeconds: 15
+          type: Pods
+          value: 1
+        selectPolicy: Min
+        stabilizationWindowSeconds: 120
+      scaleUp:
+        policies:
+        - periodSeconds: 15
+          type: Pods
+          value: 4
+        - periodSeconds: 15
+          type: Percent
+          value: 40
+        selectPolicy: Max
+        stabilizationWindowSeconds: 15
+  ports:
+    - name: http
+      containerPort: 80
+      protocol: TCP
+    - name: stub
+      containerPort: 8080
+      protocol: TCP
+
+  nodeSelector:
+    k8s.scaleway.com/type: worker
+
+  tolerations: []
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: app
+            operator: In
+            values:
+              - nginx
+
+
+fpm:
+  loop:
+    replicaCount: 1
+  migration:
+    enabled: true
+  replicaCount: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 6
+      maxUnavailable: 3
+  image:
+    repository: registry.gitlab.com/mmpro1/tap/fpm
+    pullPolicy: Always
+    tag: "develop"
+  env:
+    - name: PHP_FPM_PM_MEMORY_LIMIT
+      value: 256M
+    - name: PHP_FPM_PM
+      value: static
+    - name: PHP_FPM_PM_MAX_CHILDREN
+      value: "20"
+    - name: PHP_FPM_PM_START_SERVERS
+      value: "10"
+    - name: PHP_FPM_PM_MIN_SPARE_SERVERS
+      value: "9"
+    - name: PHP_FPM_PM_MAX_SPARE_SERVERS
+      value: "30"
+    - name: PHP_FPM_PM_MAX_REQUESTS
+      value: "50"
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 55
+    behavior:
+      scaleDown:
+        policies:
+        - periodSeconds: 15
+          type: Pods
+          value: 1
+        selectPolicy: Min
+        stabilizationWindowSeconds: 120
+      scaleUp:
+        policies:
+        - periodSeconds: 10
+          type: Percent
+          value: 40
+        selectPolicy: Max
+        stabilizationWindowSeconds: 0
+
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1500Mi
+    requests:
+      cpu: 950m
+      memory: 1Gi
+
+  startupProbe:
+    tcpSocket:
+      port: 9000
+    failureThreshold: 30
+    periodSeconds: 1
+
+  livenessProbe:
+    tcpSocket:
+      port: 9000
+    failureThreshold: 5
+    periodSeconds: 10
+
+  readinessProbe:
+    tcpSocket:
+      port: 9000
+    failureThreshold: 1
+    periodSeconds: 10
+
+  ports:
+    - name: fpm
+      containerPort: 9000
+      protocol: TCP
+
+  customSecrets: []
+
+  envFrom:
+    - secretRef:
+        name: custom-env-fpm
+
+  nodeSelector:
+    k8s.scaleway.com/type: worker
+
+  service:
+    type: ClusterIP
+    port: 9000
+
+  tolerations: []
+
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: app
+            operator: In
+            values:
+              - php-fpm
+
+imagePullSecrets:
+  - name: docker
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: api.mmbump.pro
+      serviceSuffix: "-nginx"
+      servicePort: 80
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    hosts:
+      - api.mmbump.pro
+    secretName: le-api-mmbump-pro
+
+# Additional volumes on the output Deployment definition.
+volumes: []
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+
+
+env:
+  fpm:
+    APP_NAME: tap
+    APP_ENV: prod
+    APP_DEBUG: "false"
+    APP_KEY: "base64:EeHWrIf3IEgTWGfkhwz+NRFS/Er0KJwBo2XxXCz25J0="
+    APP_URL: https://api.mmbump.pro
+    APP_FRONT_URL: https://mmbump.pro
+    LOG_CHANNEL: stderr
+    CORS_URL: "https://mmbump.pro,https://bumpstore.app"
+    TELEGRAM_NAME: "MMproBump_bot"
+    BOT_FARMING_LENGTH: 21600
+    APP_NFT_URL: "https://apiton.mmbump.pro"
+  mysql:
+    DB_READ_HOST_LIST: ""
+    DB_WRITE_HOST:
+    DB_PORT: ""
+    DB_DATABASE: ""
+    DB_USERNAME: ""
+    DB_PASSWORD: ""
+  mysql_log:
+    DB_LOG_READ_HOST_LIST: ""
+    DB_LOG_WRITE_HOST: ""
+    DB_LOG_PORT: ""
+    DB_LOG_DATABASE: ""
+    DB_LOG_USERNAME: ""
+    DB_LOG_PASSWORD: ""
+  memcached:
+    MEMCACHED_HOST: memchache-memcached.memcached.svc.cluster.local
+  nginx:
+    PHP_HOST: tap-php-fpm.tap.svc.cluster.local
+    PHP_PORT: 9000
+    NGINX_PORT: 80
+    NGINX_ERROR_LOG: /var/log/nginx/error.log
+    NGINX_ROOT_PATH: /application/public
+
+mysql:
+  source: secret # env or precreated secret from cloud
+  secretName: mysql-config
+mysql_log:
+  source: secret
+  secretName: mysql-log-config
+
+metrics:
+  enabled: true
+  nginx:
+    enabled: true
+    image:
+      repository: nginx/nginx-prometheus-exporter
+      pullPolicy: IfNotPresent
+      tag: 1.1
+    port: 9113
+    serviceMonitor:
+      enabled: true
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi
+
+
+  fpm:
+    enabled: true
+    image:
+      repository: hipages/php-fpm_exporter
+      pullPolicy: IfNotPresent
+      tag: 2.2
+    port: 9253
+    path: /status
+    serviceMonitor:
+      enabled: true
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 50m
+        memory: 128Mi

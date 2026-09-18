@@ -1,0 +1,122 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tap-php.fullname" . }}-fpm
+  labels:
+    {{- include "tap-php.labels" . | nindent 4 }}
+    app: php-fpm
+spec:
+  {{- if not .Values.fpm.autoscaling.enabled }}
+  replicas: {{ .Values.fpm.replicaCount }}
+  {{- end }}
+  {{- if .Values.fpm.strategy }}
+  strategy:
+    {{- toYaml .Values.fpm.strategy | nindent 6 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "tap-php.selectorLabels" . | nindent 6 }}
+      app: php-fpm
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "tap-php.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        app: php-fpm
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "tap-php.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: fpm
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- if .Values.tag }}
+          image: "{{ .Values.fpm.image.repository }}:{{ .Values.tag }}"
+          {{- else }}
+          image: "{{ .Values.fpm.image.repository }}:{{ .Values.fpm.image.tag | default .Chart.AppVersion }}"
+          {{- end }}
+          imagePullPolicy: {{ .Values.fpm.image.pullPolicy }}
+          ports:
+{{ toYaml .Values.fpm.ports | indent 12 }}
+          {{- if or .Values.fpm.customSecrets .Values.fpm.env }}
+          env:
+          {{- with  .Values.fpm.customSecrets  }}
+{{ toYaml . | indent 12 }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.fpm.env }}
+          {{- toYaml .Values.fpm.env | nindent 12 }}
+          {{- end }}
+          envFrom:
+            - secretRef:
+                name: {{ include "tap-php.fullname" . }}-env-fpm
+          {{- if eq .Values.mysql.source "secret" }}
+            - secretRef:
+                name: {{ .Values.mysql.secretName }}
+          {{- end }}
+          {{- if eq .Values.mysql_log.source "secret" }}
+            - secretRef:
+                name: {{ .Values.mysql_log.secretName }}
+          {{- end }}
+          {{- if .Values.fpm.envFrom }}
+          {{- toYaml .Values.fpm.envFrom | nindent 12 }}
+          {{- end }}
+          livenessProbe:
+            {{- toYaml .Values.fpm.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.fpm.readinessProbe | nindent 12 }}
+          startupProbe:
+            {{- toYaml .Values.fpm.startupProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.fpm.resources | nindent 12 }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+{{- if and .Values.metrics.enabled .Values.metrics.fpm.enabled }}
+        - name: exporter
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.metrics.fpm.image.repository }}:{{ .Values.metrics.fpm.image.tag }}"
+          imagePullPolicy: {{ .Values.metrics.fpm.image.pullPolicy }}
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.metrics.fpm.port }}
+              protocol: TCP
+          env:
+            - name: PHP_FPM_FIX_PROCESS_COUNT
+              value: "true"
+            - name: PHP_FPM_SCRAPE_URI
+              value: tcp://127.0.0.1:{{ .Values.fpm.readinessProbe.tcpSocket.port }}{{ .Values.metrics.fpm.path }}"
+            - name: PHP_FPM_WEB_LISTEN_ADDRESS
+              value: ":{{ .Values.metrics.fpm.port }}"
+          resources:
+            {{- toYaml .Values.metrics.fpm.resources | nindent 12 }}
+{{- end }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.fpm.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.fpm.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.fpm.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,89 @@
+;; Deployer for nft sales
+#include "../../op-codes.fc";
+
+int op::do_sale() asm "0x0fe0ede PUSHINT";
+
+;; storage scheme
+;; storage#_ owner_address:MsgAddress
+;;           = Storage;
+
+
+() recv_internal(int balance, int msg_value, cell in_msg_full, slice in_msg_body) impure { ;; обработка сообщений
+    if (in_msg_body.slice_empty?()) { ;; пропускаем пустые сообщения
+        return ();
+    }
+    slice cs = in_msg_full.begin_parse(); ;; парсинг входящего сообщения
+    int flags = cs~load_uint(4);          ;; получаем флаги
+
+    if (flags & 1) {  ;; пропускаем сообщения с флагом bounced
+        return ();
+    }
+    slice sender_address = cs~load_msg_addr(); ;; получаем адрес отправителя
+    ;; cs.end_parse();
+
+    int op = in_msg_body~load_uint(32); ;; получаем опкод
+
+    if (op == op::ownership_assigned()) { ;; проверям, что это опкод ownership_assigned (0x05138d91)
+      int query_id = in_msg_body~load_uint(64); ;; считываем quer_id
+      var prev_owner = in_msg_body~load_msg_addr(); ;; считываем адрес предыдущего владельца (кто отправил нфт)
+      int sub_op = in_msg_body~load_uint(32); ;; считываем подоперацию
+      throw_if(404, sub_op != op::do_sale()); ;; проверяем, что операция - выставление на продажу (0x0fe0ede)
+      (cell state_init, cell body) = (in_msg_body~load_ref(), in_msg_body~load_ref()); ;; получаем данные для деплоя сейла
+      in_msg_body.end_parse(); ;; парсинг окончен
+      int state_init_hash = cell_hash(state_init); ;; получаем хэш данных для инициализации сейла
+      slice dest_address = begin_cell().store_int(0, 8).store_uint(state_init_hash, 256).end_cell().begin_parse(); ;; и вычисляем адрес
+
+      var msg = begin_cell() ;; собираем сообщения для деплоя
+        .store_uint(0x18, 6) ;; я хз че это
+        .store_uint(4, 3).store_slice(dest_address) ;; ложим адрес, на котором будет инициализирован сейл
+        .store_grams(20000000) ;; 0.02 TON - для комиссий
+        .store_uint(4 + 2 + 1, 1 + 4 + 4 + 64 + 32 + 1 + 1 + 1) ;; хз
+        .store_ref(state_init) ;; данные для инициализации
+        .store_ref(body) ;; тоже
+        .end_cell();
+      send_raw_message(msg, 1); ;; деплой сейла
+
+      var transfer_msg = begin_cell() ;; затем собираем сообщение для перевода нфт сейлу
+              .store_uint(0x18, 6)
+              .store_slice(sender_address)
+              .store_grams(0)
+              .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+              .store_uint(op::transfer(), 32)
+              .store_uint(query_id, 64)
+              .store_uint(4, 3).store_slice(dest_address) ;; new owner
+              .store_slice(prev_owner) ;; response_to
+              .store_int(0, 1) ;; no payload
+              .store_grams(0) ;; forward_amount
+              .store_int(0, 1) ;; no body
+              .end_cell();
+      var reserve = balance - msg_value; ;; резервируем тоны для комиссий
+      if (reserve < 1000000) {
+        reserve = 1000000; ;; 0.001 TON
+      } else {
+        reserve += 1000; ;; 0.000001 TON for storage usage
+      }
+      raw_reserve(reserve, 0); ;; reserve some bebras  🐈
+      send_raw_message(transfer_msg, 128); ;; отправляем нфт сейлу
+
+      return ();
+    }
+;;
+    if (op == 1) { ;; accept for deploy
+      return ();
+    }
+
+    if (op == 555) { ;; проксирование сообщений к сейлам этого маркетплейса
+      var ds = get_data().begin_parse(); ;; получем данные
+      var owner_address = ds~load_msg_addr(); ;; вытаскиваем адрес овнера
+      throw_unless(403, equal_slices(owner_address, sender_address)); ;; проверяем, что сообщение пришло от него
+      ;; way to fix unexpected troubles with auction contract
+      ;; for example if some one transfer nft to this contract
+      var msg = in_msg_body~load_ref().begin_parse(); ;; вытаскиваем само сообщение
+      var mode = msg~load_uint(8); ;; режим отправки
+      send_raw_message(msg~load_ref(), mode); ;; адрес сейла вытаскивется и на него переправляется сообщение
+      return ();
+    }
+
+    throw(0xffff);
+}
+

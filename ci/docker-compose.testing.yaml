@@ -1,0 +1,123 @@
+version: "3.5"
+name: unit-test
+services:
+  memcached-test:
+    image: memcached:alpine
+    container_name: memcached-test
+    restart: always
+    ports:
+      - "11212:11211"
+
+  mysql-test:
+    image: mysql:8.0
+    command: "--default-authentication-plugin=mysql_native_password --skip-log-bin"
+    container_name: mysql-test
+    restart: always
+    volumes:
+      - /home/develop/test/mysql:/var/lib/mysql
+    ports:
+      - "3308:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=tap
+
+  mysql-log-test:
+    image: mysql:8.0
+    command: "--default-authentication-plugin=mysql_native_password --skip-log-bin"
+    container_name: mysql_log-test
+    restart: always
+    volumes:
+      - /home/develop/test/mysql-log:/var/lib/mysql
+    ports:
+      - "3309:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=tap-log
+
+  front-test:
+    container_name: front-test
+    build:
+      context: ..
+      dockerfile: ci/front/docker/test-node.Dockerfile
+    volumes:
+      - ${PWD}/junit:/application/test
+    command:
+      - /bin/sh
+      - -c
+      - |
+        npm i jest-junit
+        npm test -- --reporters=jest-junit --watchAll=false
+    environment:
+      - REACT_APP_MODE=test
+      - REACT_APP_API_URL=https://api.test.mmbump.pro
+      - REACT_APP_WSS_URL=wss://dev8.usmykyta.pro/connection/websocket
+      - REACT_APP_TON_API_URL=https://tonapi.io/v2
+      - REACT_APP_TAP_TONAPI_URL=https://apiton.test.mmbump.pro
+      - REACT_APP_TRANSACTION_NFT_LIFE_TIME=600
+      - REACT_APP_FARMING_PERIOD=30
+      - REACT_APP_APITON_URL=https://apiton.test.mmbump.pro
+      - REACT_APP_WEB_TEST_URL=https://front.test.bumpstore.app
+      - REACT_APP_TELEGRAM_TEST_URL=https://front.test.mmbump.pro
+      - REACT_APP_WEB_PROD_URL=https://bumpstore.app
+      - REACT_APP_TELEGRAM_PROD_URL=https://mmbump.pro
+  ton-test:
+    image: ${TON_IMAGE}:${VERSION}
+    container_name: ton-test
+    command:
+      - /bin/sh
+      - -c
+      - |
+        npm i jest-junit
+        npm test -- --reporters=jest-junit --watchAll=false
+    environment:
+      - API_URL=https://api.test.mmbump.pro
+    volumes:
+      - ${PWD}/junit:/application/test
+
+
+  php-test:
+    container_name: php-test
+    depends_on:
+      - mysql-test
+      - mysql-log-test
+      - memcached-test
+    image: ${FPM_IMAGE}:${VERSION}
+    links:
+      - mysql-test
+      - mysql-log-test
+      - memcached-test
+    command:
+      - /bin/bash
+      - -c
+      - |
+        /usr/bin/php8.1 artisan migrate && vendor/phpunit/phpunit/phpunit --log-junit junit/php-junit.xml
+    volumes:
+      - ${PWD}/junit:/application/junit
+
+    environment:
+      - APP_NAME=Laravel
+      - APP_ENV=test
+      - APP_KEY=base64:eUituHpDxJR07EFiv22czM8CEQ/HaSkFjKGuSAWNHSU=
+      - APP_DEBUG=true
+      - APP_URL=https://api.test.mmbump.pro
+      - APP_FRONT_URL=https://front.test.mmbump.pro
+      - DB_WRITE_HOST=mysql-test
+      - DB_READ_HOST_LIST=mysql-test
+      - DB_PORT=3306
+      - DB_DATABASE=tap
+      - DB_USERNAME=root
+      - DB_PASSWORD=password
+      - DB_LOG_WRITE_HOST=mysql-log-test
+      - DB_LOG_READ_HOST_LIST=mysql-log-test
+      - DB_LOG_PORT=3306
+      - DB_LOG_DATABASE=tap-log
+      - DB_LOG_USERNAME=root
+      - DB_LOG_PASSWORD=password
+      - SESSION_DRIVER=memcached
+      - LOG_CHANNEL=stderr
+      - MEMCACHED_HOST=memcached-test
+      - TELEGRAM_BOT_TOKEN=7114012929:AAGLC0eS14fVdy6k6Hv2iCTFMfmFkhq5MdU
+      - TELEGRAM_NAME=mmbump_test_bot
+      - CORS_URL=*
+      - BOT_FARMING_LENGTH=30
+      - JWT_SECRET=15BVK0mpY21qoH98l7BvE1XiUR132Avubg0tmxm8HThTfnVpUxCkFpuiVGZttdf3

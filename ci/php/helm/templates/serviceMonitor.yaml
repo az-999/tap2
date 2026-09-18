@@ -1,0 +1,34 @@
+{{- if .Values.metrics.enabled  }}
+{{- if and .Values.metrics.fpm.enabled .Values.metrics.fpm.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "tap-php.fullname" . }}-fpm-metrics
+  labels:
+    {{- include "tap-php.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "tap-php.labels" . | nindent 6 }}
+      app: php-fpm
+  endpoints:
+  - port: metrics
+{{- end }}
+{{- if and .Values.metrics.nginx.enabled .Values.metrics.nginx.serviceMonitor.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "tap-php.fullname" . }}-fpm-nginx-metrics
+  labels:
+    {{- include "tap-php.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "tap-php.labels" . | nindent 6 }}
+      app: php-fpm-nginx
+  endpoints:
+  - port: metrics
+    interval: "10s"
+{{- end }}
+{{- end }}

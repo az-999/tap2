@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tap-php.fullname" . }}-nginx
+  labels:
+    {{- include "tap-php.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.nginx.autoscaling.enabled }}
+  replicas: {{ .Values.nginx.replicaCount }}
+  {{- end }}
+  {{- if .Values.nginx.strategy }}
+  strategy:
+    {{- toYaml .Values.nginx.strategy | nindent 6 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "tap-php.selectorLabels" . | nindent 6 }}
+      app: php-fpm-nginx
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "tap-php.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        app: php-fpm-nginx
+    spec:
+      hostNetwork: false
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "tap-php.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: nginx
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- if .Values.tag }}
+          image: "{{ .Values.nginx.image.repository }}:{{ .Values.tag }}"
+          {{- else }}
+          image: "{{ .Values.nginx.image.repository }}:{{ .Values.nginx.image.tag | default .Chart.AppVersion }}"
+          {{- end }}
+          imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
+          envFrom:
+          - secretRef:
+              name: {{ include "tap-php.fullname" . }}-env-nginx
+          ports:
+{{ toYaml .Values.nginx.ports | indent 12 }}
+          livenessProbe:
+            {{- toYaml .Values.nginx.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.nginx.readinessProbe | nindent 12 }}
+          startupProbe:
+            {{- toYaml .Values.nginx.startupProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.nginx.resources | nindent 12 }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+{{- if and .Values.metrics.enabled .Values.metrics.nginx.enabled }}
+        - name: exporter
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.metrics.nginx.image.repository }}:{{ .Values.metrics.nginx.image.tag }}"
+          imagePullPolicy: {{ .Values.metrics.nginx.image.pullPolicy }}
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.metrics.nginx.port }}
+              protocol: TCP
+          args:
+            - "--nginx.scrape-uri=http://localhost:8080/nginx_status"
+            - "--web.listen-address=:{{ .Values.metrics.nginx.port }}"
+          resources:
+            {{- toYaml .Values.metrics.nginx.resources | nindent 12 }}
+{{- end }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nginx.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nginx.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nginx.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,4 @@
+*
+!ci/front/docker
+!version.json
+!react

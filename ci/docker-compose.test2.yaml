@@ -1,0 +1,195 @@
+version: "3.5"
+
+services:
+  memcached2:
+    image: memcached:alpine
+    restart: always
+    container_name: memcached2
+    ports:
+      - "11213:11211"
+
+  phpmyadmin2:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin2
+    restart: always
+    links:
+      - mysql2
+      - mysql-log2
+    depends_on:
+      - mysql2
+      - mysql-log2
+    ports:
+      - "127.0.0.1:8091:80"
+    environment:
+      PMA_HOST: mysql2
+
+  mysql2:
+    image: mysql:8.0
+    command: "--default-authentication-plugin=mysql_native_password --skip-log-bin"
+    container_name: mysql2
+    restart: always
+    volumes:
+      - /home/develop/mysql2:/var/lib/mysql
+    ports:
+      - "3316:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=tap
+
+  mysql-log2:
+    image: mysql:8.0
+    command: "--default-authentication-plugin=mysql_native_password --skip-log-bin"
+    container_name: mysql-log2
+    restart: always
+    volumes:
+      - /home/develop/mysql-log2:/var/lib/mysql
+    ports:
+      - "3317:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=tap-log
+
+  front2:
+    image: ${FRONT_IMAGE}:${VERSION}
+    container_name: front2
+    ports:
+      - 8092:3000
+    environment:
+      - REACT_APP_MODE=test
+      - REACT_APP_API_URL=https://api.test.mmbump.pro
+      - REACT_APP_WSS_URL=wss://dev8.usmykyta.pro/connection/websocket
+      - REACT_APP_TON_API_URL=https://tonapi.io/v2
+      - REACT_APP_TAP_TONAPI_URL=https://apiton.test2.mmbump.pro
+      - REACT_APP_TRANSACTION_NFT_LIFE_TIME=600
+      - REACT_APP_FARMING_PERIOD=30
+      - REACT_APP_APITON_URL=https://apiton.test2.mmbump.pro
+
+  ton2:
+    image: ${TON_IMAGE}:${VERSION}
+    container_name: ton2
+    ports:
+      - 8093:3000
+    environment:
+      - API_URL=https://api.test2.mmbump.pro
+      - JWT_SECRET=15BVK0mpY21qoH98l7BvE1XiUR132Avubg0tmxm8HThTfnVpUxCkFpuiVGZttdf3
+      - COLLECTION_ADDRESS_NFT1=EQBqqjvW9DKAinL7eKie6ScozUWCu4Z0Uod5abtrbql58q_E
+      # - COLLECTION_ADDRESS_NFT1=EQBj8gH_-06qjngcQT4qFckB4ozueOqIOUqIZ6UslwNoj8zX
+      - COLLECTION_ADDRESS_NFT2=EQCTwN6lQNicNIVJPga9d2FCS2DdAvvQb8vFD1eS4_dcv_RZ
+      - COLLECTION_ADDRESS_NFT3=EQCamaf-BiHae4rtNcc2UK-vCsHguu1PkQ3Odq1DllwCsjPb
+      - COLLECTION_ADDRESS_NFT4=EQCWobuqCICbdaDlhm1L-55PC9UwynLPs8Xurs-EwjKeX-xM
+      - COLLECTION_ADDRESS_NFT5=EQDJXfeotxIQBbcpMFGyFyBSxQBTl6Kaljr8y3mQUJ8oG5mZ
+      - MARKETPLACE_ADDRESS=EQAJ-QU4xFrQRr1JCtQS7zAgCOvVDl5tkBvgwbAGOGiRd9MO
+      - OWNER_CONTRACT_MNEMONIC=awful mass seek grace man claim asthma wide coconut wage mimic woman style orbit pencil case rug define window speak piece black like buffalo
+      - NETWORK=testnet
+      - BACKEND_TOKEN=e66852fdd3a7cadf263bc5d967e89332
+
+  php-fpm2:
+    container_name: php-fpm2
+    depends_on:
+      - mysql2
+      - mysql-log2
+      - memcached2
+    image: ${FPM_IMAGE}:${VERSION}
+    ports:
+      - 9010:9000
+    links:
+      - mysql2
+      - mysql-log2
+      - memcached2
+    command:
+      - /bin/bash
+      - -c
+      - |
+        /usr/bin/php8.1 artisan migrate && /usr/sbin/php-fpm8.1 -O
+
+    environment:
+      - APP_NAME=Laravel
+      - APP_ENV=test
+      - APP_KEY=base64:eUituHpDxJR07EFiv22czM8CEQ/HaSkFjKGuSAWNHSU=
+      - APP_DEBUG=true
+      - APP_URL=https://api.test2.mmbump.pro
+      - APP_FRONT_URL=https://front.test2.mmbump.pro
+      - DB_WRITE_HOST=mysql2
+      - DB_READ_HOST_LIST=mysql2
+      - DB_PORT=3306
+      - DB_DATABASE=tap
+      - DB_USERNAME=root
+      - DB_PASSWORD=password
+      - DB_LOG_WRITE_HOST=mysql-log2
+      - DB_LOG_READ_HOST_LIST=mysql-log2
+      - DB_LOG_PORT=3306
+      - DB_LOG_DATABASE=tap-log
+      - DB_LOG_USERNAME=root
+      - DB_LOG_PASSWORD=password
+      - SESSION_DRIVER=memcached
+      - LOG_CHANNEL=stderr
+      - MEMCACHED_HOST=memcached2
+      - TELEGRAM_BOT_TOKEN=7368536629:AAE8xv7mhr-KIPszL4T0BEySjtLMn4OTpRg
+      - TELEGRAM_NAME=mmbump_test_bot
+      - CORS_URL=*
+      - BOT_FARMING_LENGTH=60
+      - JWT_SECRET=15BVK0mpY21qoH98l7BvE1XiUR132Avubg0tmxm8HThTfnVpUxCkFpuiVGZttdf3
+      - APP_NFT_TOKEN=e66852fdd3a7cadf263bc5d967e89332
+      - APP_WALLET=EQDSni3H4D2iR7ZNU7nxWNm0vLFAAyw7XRD9eEnbM2CElIHE
+      - APP_NFT_PRICE=80000000
+      - APP_NFT_URL=https://apiton.test2.mmbump.pro
+      - REQ_SIGN_KEY=super-key
+
+  php-fpm-loop2:
+    container_name: php-fpm-loop2
+    depends_on:
+      - mysql2
+      - mysql-log2
+      - memcached2
+    image: ${FPM_IMAGE}:${VERSION}
+    links:
+      - mysql2
+      - mysql-log2
+      - memcached2
+    command:
+      - /entrypoint-loop.sh
+    environment:
+      - APP_NAME=Laravel
+      - APP_ENV=test
+      - APP_KEY=base64:eUituHpDxJR07EFiv22czM8CEQ/HaSkFjKGuSAWNHSU=
+      - APP_DEBUG=true
+      - APP_URL=https://api.test2.mmbump.pro
+      - APP_FRONT_URL=https://front.test2.mmbump.pro
+      - DB_WRITE_HOST=mysql2
+      - DB_READ_HOST_LIST=mysql2
+      - DB_PORT=3306
+      - DB_DATABASE=tap
+      - DB_USERNAME=root
+      - DB_PASSWORD=password
+      - DB_LOG_WRITE_HOST=mysql-log2
+      - DB_LOG_READ_HOST_LIST=mysql-log2
+      - DB_LOG_PORT=3306
+      - DB_LOG_DATABASE=tap-log
+      - DB_LOG_USERNAME=root
+      - DB_LOG_PASSWORD=password
+      - SESSION_DRIVER=memcached
+      - LOG_CHANNEL=stderr
+      - MEMCACHED_HOST=memcached2
+      - TELEGRAM_BOT_TOKEN=7368536629:AAE8xv7mhr-KIPszL4T0BEySjtLMn4OTpRg
+      - TELEGRAM_NAME=mmbump_test_bot
+      - CORS_URL=*
+      - BOT_FARMING_LENGTH=60
+      - JWT_SECRET=15BVK0mpY21qoH98l7BvE1XiUR132Avubg0tmxm8HThTfnVpUxCkFpuiVGZttdf3
+      - APP_NFT_TOKEN=e66852fdd3a7cadf263bc5d967e89332
+      - APP_WALLET=EQDSni3H4D2iR7ZNU7nxWNm0vLFAAyw7XRD9eEnbM2CElIHE
+      - APP_NFT_PRICE=80000000
+      - APP_NFT_URL=https://apiton.test2.mmbump.pro
+      - REQ_SIGN_KEY=super-key
+
+  php-nginx2:
+    container_name: php-nginx2
+    depends_on:
+      - php-fpm2
+    image: ${NGINX_IMAGE}:${VERSION}
+    ports:
+      - 8090:80
+    links:
+      - php-fpm2
+    environment:
+      - PHP_HOST=php-fpm2
+      - NGINX_RESOLVER=127.0.0.11
