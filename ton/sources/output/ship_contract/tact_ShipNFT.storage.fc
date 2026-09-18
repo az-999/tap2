@@ -1,0 +1,126 @@
+;;
+;; Type: SendParameters
+;; TLB: _ bounce:bool to:address value:int257 mode:int257 body:Maybe ^cell code:Maybe ^cell data:Maybe ^cell = SendParameters
+;;
+
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_value_bounce_body(slice $to, int $value, int $bounce, cell $body) inline {
+    return ($bounce, $to, $value, 0, $body, null(), null());
+}
+
+;;
+;; Type: OwnershipAssigned
+;; TLB: _ query_id:int257 prev_owner:address = OwnershipAssigned
+;;
+
+builder $OwnershipAssigned$_store(builder build_0, (int, slice) v) inline {
+    var (v'query_id, v'prev_owner) = v;
+    build_0 = build_0.store_int(v'query_id, 257);
+    build_0 = __tact_store_address(build_0, v'prev_owner);
+    return build_0;
+}
+
+cell $OwnershipAssigned$_store_cell((int, slice) v) inline {
+    return $OwnershipAssigned$_store(begin_cell(), v).end_cell();
+}
+
+((int, slice)) $OwnershipAssigned$_constructor_query_id_prev_owner(int $query_id, slice $prev_owner) inline {
+    return ($query_id, $prev_owner);
+}
+
+;;
+;; Type: Transfer
+;; Header: 0x5b3c1613
+;; TLB: transfer#5b3c1613 new_owner:address forward_amount:uint64 query_id:uint64 = Transfer
+;;
+
+(slice, ((slice, int, int))) $Transfer$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 1530664467);
+    var v'new_owner = sc_0~__tact_load_address();
+    var v'forward_amount = sc_0~load_uint(64);
+    var v'query_id = sc_0~load_uint(64);
+    return (sc_0, (v'new_owner, v'forward_amount, v'query_id));
+}
+
+;;
+;; Type: BurnNFT
+;; Header: 0xa23f2d5a
+;; TLB: burn_nft#a23f2d5a  = BurnNFT
+;;
+
+(slice, (tuple)) $BurnNFT$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 2722049370);
+    return (sc_0, null());
+}
+
+;;
+;; Type: GetNftData
+;; TLB: _ is_initialized:bool index:int257 collection_address:address owner_address:address individual_content:^cell = GetNftData
+;;
+
+(int, int, slice, slice, cell) $GetNftData$_to_external(((int, int, slice, slice, cell)) v) inline {
+    var (v'is_initialized, v'index, v'collection_address, v'owner_address, v'individual_content) = v; 
+    return (v'is_initialized, v'index, v'collection_address, v'owner_address, v'individual_content);
+}
+
+((int, int, slice, slice, cell)) $GetNftData$_constructor_is_initialized_index_collection_address_owner_address_individual_content(int $is_initialized, int $index, slice $collection_address, slice $owner_address, cell $individual_content) inline {
+    return ($is_initialized, $index, $collection_address, $owner_address, $individual_content);
+}
+
+;;
+;; Type: ShipNFT
+;;
+
+builder $ShipNFT$_store(builder build_0, (slice, slice, int, int, slice, cell) v) inline {
+    var (v'collection_address, v'trusted_contract, v'item_index, v'is_initialized, v'owner, v'content) = v;
+    build_0 = __tact_store_address(build_0, v'collection_address);
+    build_0 = __tact_store_address(build_0, v'trusted_contract);
+    build_0 = build_0.store_int(v'item_index, 257);
+    build_0 = build_0.store_int(v'is_initialized, 1);
+    var build_1 = begin_cell();
+    build_1 = __tact_store_address_opt(build_1, v'owner);
+    build_1 = ~ null?(v'content) ? build_1.store_int(true, 1).store_ref(v'content) : build_1.store_int(false, 1);
+    build_0 = store_ref(build_0, build_1.end_cell());
+    return build_0;
+}
+
+(slice, ((slice, slice, int, int, slice, cell))) $ShipNFT$_load(slice sc_0) inline {
+    var v'collection_address = sc_0~__tact_load_address();
+    var v'trusted_contract = sc_0~__tact_load_address();
+    var v'item_index = sc_0~load_int(257);
+    var v'is_initialized = sc_0~load_int(1);
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'owner = sc_1~__tact_load_address_opt();
+    var v'content = sc_1~load_int(1) ? sc_1~load_ref() : null();
+    return (sc_0, (v'collection_address, v'trusted_contract, v'item_index, v'is_initialized, v'owner, v'content));
+}
+
+(slice, ((slice, int, slice, cell))) $ShipNFT$init$_load(slice sc_0) inline {
+    var v'collection_address = sc_0~__tact_load_address();
+    var v'item_index = sc_0~load_int(257);
+    var v'owner = sc_0~__tact_load_address();
+    var v'content = sc_0~load_ref();
+    return (sc_0, (v'collection_address, v'item_index, v'owner, v'content));
+}
+
+(slice, slice, int, int, slice, cell) $ShipNFT$_contract_load() impure inline_ref {
+    slice $sc = get_data().begin_parse();
+    __tact_context_sys = $sc~load_ref();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~$ShipNFT$_load();
+    } else {
+        ;; Allow only workchain deployments
+        throw_unless(137, my_address().preload_uint(11) == 1024);
+        (slice $collection_address, int $item_index, slice $owner, cell $content) = $sc~$ShipNFT$init$_load();
+        $sc.end_parse();
+        return $ShipNFT$_contract_init($collection_address, $item_index, $owner, $content);
+    }
+}
+
+() $ShipNFT$_contract_store((slice, slice, int, int, slice, cell) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_ref(__tact_context_sys);
+    b = b.store_int(true, 1);
+    b = $ShipNFT$_store(b, v);
+    set_data(b.end_cell());
+}

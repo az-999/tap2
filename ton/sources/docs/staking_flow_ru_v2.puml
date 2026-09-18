@@ -1,0 +1,98 @@
+@startuml
+!define FONT_MAIN Helvetica
+!define COLOR_BG #FFFFFF
+!define COLOR_BORDER #2C3E50
+!define COLOR_BOX #3498DB
+!define COLOR_ACTOR #E74C3C
+!define COLOR_NOTE #F1C40F
+!define COLOR_LIFELINE #BDC3C7
+
+skinparam backgroundColor COLOR_BG
+skinparam defaultFontName FONT_MAIN
+skinparam defaultFontSize 12
+
+skinparam sequence {
+    ArrowColor COLOR_BORDER
+    ActorBorderColor COLOR_ACTOR
+    ActorBackgroundColor #FADBD8
+    ParticipantBorderColor COLOR_BOX
+    ParticipantBackgroundColor #EBF5FB
+    LifeLineBorderColor COLOR_LIFELINE
+    LifeLineBackgroundColor COLOR_BG
+    BoxBorderColor COLOR_BORDER
+    BoxBackgroundColor #ECF0F1
+    NoteBorderColor #D4AC0D
+    NoteBackgroundColor #FCF3CF
+    GroupBorderColor COLOR_BORDER
+    GroupBackgroundColor #ECF0F1
+}
+
+skinparam BoxPadding 10
+skinparam ParticipantPadding 20
+
+title <b>Обновленная схема работы системы стейкинга</b>\n
+
+box "Клиентская часть" #E8F6F3
+participant "Пользователь" as User #FFFFFF
+participant "Фронтенд" as FE
+end box
+
+box "Серверная часть" #EBF5FB
+participant "Бэкенд" as BE
+participant "Старый стейкинг" as OldStake
+participant "RewardHelper" as Helper
+participant "Новый стейкинг" as NewStake
+participant "NFT Контракт" as NFT
+end box
+
+== Инициализация ==
+note over Helper, NFT #FCF3CF
+  <b>Последовательность действий:</b>
+  1. Деплой нового стейкинг контракта
+  2. Установка нового стейкинг контракта как second_minter в NFT контракте
+  3. Деплой RewardHelper с адресом нового стейкинг контракта
+  4. Импорт данных о старых стейках в RewardHelper
+end note
+
+== Процесс нового стейка ==
+User -> FE ++: Нажатие "Стейк"
+FE -> BE ++: Запрос на стейк
+BE -> NewStake ++: Создание стейка
+NewStake -> NFT ++: Минт NFT\n(как second_minter)
+return NFT создан
+return Стейк создан
+return Успех
+return Показать успех
+
+== Процесс клейма старого стейка ==
+User -> FE ++: Нажатие "Клейм"\n(старый стейк)
+FE -> BE ++: Запрос на клейм
+BE -> Helper ++: Запрос клейма
+Helper -> User: Отправка правильной\nсуммы реварда
+Helper -> NewStake ++: Запрос на минт NFT
+NewStake -> NFT ++: Минт NFT\n(как second_minter)
+return NFT создан
+return Минт подтвержден
+return Клейм обработан
+return Успех
+return Показать успех
+
+== Процесс клейма нового стейка ==
+User -> FE ++: Нажатие "Клейм"\n(новый стейк)
+FE -> BE ++: Запрос на клейм
+BE -> NewStake ++: Запрос клейма
+NewStake -> User: Отправка реварда
+NewStake -> NFT ++: Минт NFT\n(как second_minter)
+return NFT создан
+return Клейм обработан
+return Успех
+return Показать успех
+
+legend right
+  |<back:#E8F8F5>    </back>| <b>Компонент</b> |<b>Назначение</b> |
+  |<back:#EBF5FB>    </back>| RewardHelper | Обработка ревардов старых стейков |
+  |<back:#EBF5FB>    </back>| Новый стейкинг | Обработка новых стейков и минт NFT |
+  |<back:#EBF5FB>    </back>| NFT Контракт | Минт NFT (second_minter = Новый стейкинг) |
+endlegend
+
+@enduml

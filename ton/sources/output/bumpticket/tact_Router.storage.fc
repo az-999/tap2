@@ -1,0 +1,280 @@
+;;
+;; Type: StateInit
+;; TLB: _ code:^cell data:^cell = StateInit
+;;
+
+((cell, cell)) $StateInit$_not_null(tuple v) inline {
+    throw_if(128, null?(v));
+    var (cell vvv'code, cell vvv'data) = __tact_tuple_destroy_2(v);
+    return (vvv'code, vvv'data);
+}
+
+;;
+;; Type: SendParameters
+;; TLB: _ bounce:bool to:address value:int257 mode:int257 body:Maybe ^cell code:Maybe ^cell data:Maybe ^cell = SendParameters
+;;
+
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_bounce_to_value_mode_body_code_data(int $bounce, slice $to, int $value, int $mode, cell $body, cell $code, cell $data) inline {
+    return ($bounce, $to, $value, $mode, $body, $code, $data);
+}
+
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_mode_value_body_bounce(slice $to, int $mode, int $value, cell $body, int $bounce) inline {
+    return ($bounce, $to, $value, $mode, $body, null(), null());
+}
+
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_value_bounce(slice $to, int $value, int $bounce) inline {
+    return ($bounce, $to, $value, 0, null(), null(), null());
+}
+
+;;
+;; Type: Deploy
+;; Header: 0x946a98b6
+;; TLB: deploy#946a98b6 queryId:uint64 = Deploy
+;;
+
+(slice, ((int))) $Deploy$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 2490013878);
+    var v'queryId = sc_0~load_uint(64);
+    return (sc_0, (v'queryId));
+}
+
+;;
+;; Type: DeployOk
+;; Header: 0xaff90f57
+;; TLB: deploy_ok#aff90f57 queryId:uint64 = DeployOk
+;;
+
+builder $DeployOk$_store(builder build_0, (int) v) inline {
+    var (v'queryId) = v;
+    build_0 = store_uint(build_0, 2952335191, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    return build_0;
+}
+
+cell $DeployOk$_store_cell((int) v) inline {
+    return $DeployOk$_store(begin_cell(), v).end_cell();
+}
+
+((int)) $DeployOk$_constructor_queryId(int $queryId) inline {
+    return ($queryId);
+}
+
+;;
+;; Type: ProxyMsg
+;; Header: 0xd2804033
+;; TLB: proxy_msg#d2804033 to:address value:coins body:^cell = ProxyMsg
+;;
+
+(slice, ((slice, int, cell))) $ProxyMsg$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 3531620403);
+    var v'to = sc_0~__tact_load_address();
+    var v'value = sc_0~load_coins();
+    var v'body = sc_0~load_ref();
+    return (sc_0, (v'to, v'value, v'body));
+}
+
+;;
+;; Type: Deposit
+;; Header: 0xb02ba76c
+;; TLB: deposit#b02ba76c query_id:uint64 value:coins signature:^slice = Deposit
+;;
+
+(slice, ((int, int, slice))) $Deposit$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 2955650924);
+    var v'query_id = sc_0~load_uint(64);
+    var v'value = sc_0~load_coins();
+    var v'signature = sc_0~load_ref().begin_parse();
+    return (sc_0, (v'query_id, v'value, v'signature));
+}
+
+;;
+;; Type: TransferOwnership
+;; Header: 0x6b58f3fd
+;; TLB: transfer_ownership#6b58f3fd query_id:uint64 new_owner:address = TransferOwnership
+;;
+
+(slice, ((int, slice))) $TransferOwnership$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 1800991741);
+    var v'query_id = sc_0~load_uint(64);
+    var v'new_owner = sc_0~__tact_load_address();
+    return (sc_0, (v'query_id, v'new_owner));
+}
+
+;;
+;; Type: SetReferalAddress
+;; Header: 0x49798b39
+;; TLB: set_referal_address#49798b39 query_id:uint64 referal_address:address = SetReferalAddress
+;;
+
+(slice, ((int, slice))) $SetReferalAddress$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 1232702265);
+    var v'query_id = sc_0~load_uint(64);
+    var v'referal_address = sc_0~__tact_load_address();
+    return (sc_0, (v'query_id, v'referal_address));
+}
+
+;;
+;; Type: SetPrizeAddress
+;; Header: 0x354fb17d
+;; TLB: set_prize_address#354fb17d query_id:uint64 prize_address:address = SetPrizeAddress
+;;
+
+(slice, ((int, slice))) $SetPrizeAddress$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 894415229);
+    var v'query_id = sc_0~load_uint(64);
+    var v'prize_address = sc_0~__tact_load_address();
+    return (sc_0, (v'query_id, v'prize_address));
+}
+
+;;
+;; Type: SetMainAddress
+;; Header: 0x9715ed31
+;; TLB: set_main_address#9715ed31 query_id:uint64 main_address:address = SetMainAddress
+;;
+
+(slice, ((int, slice))) $SetMainAddress$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 2534796593);
+    var v'query_id = sc_0~load_uint(64);
+    var v'main_address = sc_0~__tact_load_address();
+    return (sc_0, (v'query_id, v'main_address));
+}
+
+;;
+;; Type: UpdatePublicKey
+;; Header: 0x5f4f68d6
+;; TLB: update_public_key#5f4f68d6 query_id:uint64 new_public_key:uint256 = UpdatePublicKey
+;;
+
+(slice, ((int, int))) $UpdatePublicKey$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 1599039702);
+    var v'query_id = sc_0~load_uint(64);
+    var v'new_public_key = sc_0~load_uint(256);
+    return (sc_0, (v'query_id, v'new_public_key));
+}
+
+;;
+;; Type: UpdateValue
+;; Header: 0x5265bdc6
+;; TLB: update_value#5265bdc6 query_id:uint64 new_value:coins = UpdateValue
+;;
+
+(slice, ((int, int))) $UpdateValue$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 1382399430);
+    var v'query_id = sc_0~load_uint(64);
+    var v'new_value = sc_0~load_coins();
+    return (sc_0, (v'query_id, v'new_value));
+}
+
+;;
+;; Type: Divider
+;; TLB: _ numerator:int257 denominator:int257 = Divider
+;;
+
+builder $Divider$_store(builder build_0, (int, int) v) inline {
+    var (v'numerator, v'denominator) = v;
+    build_0 = build_0.store_int(v'numerator, 257);
+    build_0 = build_0.store_int(v'denominator, 257);
+    return build_0;
+}
+
+(slice, ((int, int))) $Divider$_load(slice sc_0) inline {
+    var v'numerator = sc_0~load_int(257);
+    var v'denominator = sc_0~load_int(257);
+    return (sc_0, (v'numerator, v'denominator));
+}
+
+(int, int) $Divider$_to_external(((int, int)) v) inline {
+    var (v'numerator, v'denominator) = v; 
+    return (v'numerator, v'denominator);
+}
+
+((int, int)) $Divider$_constructor_numerator_denominator(int $numerator, int $denominator) inline {
+    return ($numerator, $denominator);
+}
+
+;;
+;; Type: SetDividors
+;; Header: 0xf8af42f9
+;; TLB: set_dividors#f8af42f9 query_id:uint64 ref_divider:Divider{numerator:int257,denominator:int257} prize_divider:Divider{numerator:int257,denominator:int257} = SetDividors
+;;
+
+(slice, ((int, (int, int), (int, int)))) $SetDividors$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 4172235513);
+    var v'query_id = sc_0~load_uint(64);
+    var v'ref_divider = sc_0~$Divider$_load();
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'prize_divider = sc_1~$Divider$_load();
+    return (sc_0, (v'query_id, v'ref_divider, v'prize_divider));
+}
+
+;;
+;; Type: Router
+;;
+
+builder $Router$_store(builder build_0, (slice, int, slice, slice, slice, int, (int, int), (int, int)) v) inline {
+    var (v'owner_address, v'owner_pubkey, v'referal_address, v'prize_address, v'main_address, v'value, (v'refDivider'numerator, v'refDivider'denominator), (v'prizeDivider'numerator, v'prizeDivider'denominator)) = v;
+    build_0 = __tact_store_address(build_0, v'owner_address);
+    build_0 = build_0.store_int(v'owner_pubkey, 257);
+    build_0 = __tact_store_address(build_0, v'referal_address);
+    var build_1 = begin_cell();
+    build_1 = __tact_store_address(build_1, v'prize_address);
+    build_1 = __tact_store_address(build_1, v'main_address);
+    build_1 = build_1.store_int(v'value, 257);
+    var build_2 = begin_cell();
+    build_2 = $Divider$_store(build_2, (v'refDivider'numerator, v'refDivider'denominator));
+    var build_3 = begin_cell();
+    build_3 = $Divider$_store(build_3, (v'prizeDivider'numerator, v'prizeDivider'denominator));
+    build_2 = store_ref(build_2, build_3.end_cell());
+    build_1 = store_ref(build_1, build_2.end_cell());
+    build_0 = store_ref(build_0, build_1.end_cell());
+    return build_0;
+}
+
+(slice, ((slice, int, slice, slice, slice, int, (int, int), (int, int)))) $Router$_load(slice sc_0) inline {
+    var v'owner_address = sc_0~__tact_load_address();
+    var v'owner_pubkey = sc_0~load_int(257);
+    var v'referal_address = sc_0~__tact_load_address();
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'prize_address = sc_1~__tact_load_address();
+    var v'main_address = sc_1~__tact_load_address();
+    var v'value = sc_1~load_int(257);
+    slice sc_2 = sc_1~load_ref().begin_parse();
+    var v'refDivider = sc_2~$Divider$_load();
+    slice sc_3 = sc_2~load_ref().begin_parse();
+    var v'prizeDivider = sc_3~$Divider$_load();
+    return (sc_0, (v'owner_address, v'owner_pubkey, v'referal_address, v'prize_address, v'main_address, v'value, v'refDivider, v'prizeDivider));
+}
+
+(slice, ((slice, int, slice, slice, slice, int))) $Router$init$_load(slice sc_0) inline_ref {
+    var v'owner_address = sc_0~__tact_load_address();
+    var v'owner_pubkey = sc_0~load_int(257);
+    var v'referal_address = sc_0~__tact_load_address();
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'prize_address = sc_1~__tact_load_address();
+    var v'main_address = sc_1~__tact_load_address();
+    var v'value = sc_1~load_int(257);
+    return (sc_0, (v'owner_address, v'owner_pubkey, v'referal_address, v'prize_address, v'main_address, v'value));
+}
+
+(slice, int, slice, slice, slice, int, (int, int), (int, int)) $Router$_contract_load() impure inline_ref {
+    slice $sc = get_data().begin_parse();
+    __tact_context_sys = $sc~load_ref();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~$Router$_load();
+    } else {
+        ;; Allow only workchain deployments
+        throw_unless(137, my_address().preload_uint(11) == 1024);
+        (slice $owner_address, int $owner_pubkey, slice $referal_address, slice $prize_address, slice $main_address, int $value) = $sc~$Router$init$_load();
+        $sc.end_parse();
+        return $Router$_contract_init($owner_address, $owner_pubkey, $referal_address, $prize_address, $main_address, $value);
+    }
+}
+
+() $Router$_contract_store((slice, int, slice, slice, slice, int, (int, int), (int, int)) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_ref(__tact_context_sys);
+    b = b.store_int(true, 1);
+    b = $Router$_store(b, v);
+    set_data(b.end_cell());
+}

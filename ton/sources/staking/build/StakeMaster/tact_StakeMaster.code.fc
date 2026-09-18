@@ -1,0 +1,382 @@
+#pragma version =0.4.4;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+#include "tact_StakeMaster.headers.fc";
+#include "tact_StakeMaster.stdlib.fc";
+#include "tact_StakeMaster.storage.fc";
+
+;;
+;; Contract StakeMaster functions
+;;
+
+(slice, int, slice, slice, slice, cell, int, slice) $StakeMaster$_contract_init(slice $owner_address, int $owner_pubkey, slice $jetton_address, slice $nft_address, cell $metadata, slice $fee_address, slice $treasury) impure inline_ref {
+    var (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury)) = (null(), null(), null(), null(), null(), null(), 0, null());
+    $self'owner_address = $owner_address;
+    $self'jetton_address = $jetton_address;
+    $self'metadata = $metadata;
+    $self'owner_pubkey = $owner_pubkey;
+    $self'fee_address = $fee_address;
+    $self'nft_address = $nft_address;
+    $self'treasury = $treasury;
+    return ($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury);
+}
+
+((slice, int, slice, slice, slice, cell, int, slice), (cell, cell)) $StakeMaster$_fun_getStakeStateInit((slice, int, slice, slice, slice, cell, int, slice) $self, (int, int, int, int, int, slice, slice, int) $msg) impure inline_ref {
+    var (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury)) = $self;
+    var (($msg'query_id, $msg'amount, $msg'out_amount, $msg'mint_count, $msg'duration, $msg'owner_address, $msg'signature, $msg'max_claims)) = $msg;
+    slice $selfAddr = $global_myAddress();
+    var $fresh$ret_0 = $Stake$_init_child(__tact_context_sys, $self'next_stake_id, $selfAddr, $msg'owner_address, $self'fee_address, $msg'amount, $msg'duration, $msg'mint_count, $self'metadata, $msg'max_claims);
+    return (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury), $fresh$ret_0);
+}
+
+((slice, int, slice, slice, slice, cell, int, slice), ()) $StakeMaster$_fun_deposit((slice, int, slice, slice, slice, cell, int, slice) $self, (int, int, int, int, int, slice, slice, int) $msg, int $value, slice $burnAddress) impure inline_ref {
+    var (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury)) = $self;
+    var (($msg'query_id, $msg'amount, $msg'out_amount, $msg'mint_count, $msg'duration, $msg'owner_address, $msg'signature, $msg'max_claims)) = $msg;
+    int $validate = $Cell$_fun_hash($Builder$_fun_endCell(store_uint(store_uint(store_uint(store_uint(store_uint(store_uint($global_beginCell(), $msg'query_id, 64), $msg'amount, 256), $msg'out_amount, 256), $msg'mint_count, 32), $msg'duration, 32), $msg'max_claims, 32)));
+    int $signature_valid = $global_checkSignature($validate, $msg'signature, $self'owner_pubkey);
+    throw_unless(48401, $signature_valid);
+    var ($stateInit'code, $stateInit'data) = ($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury)~$StakeMaster$_fun_getStakeStateInit($Deposit$_tensor_cast(($msg'query_id, $msg'amount, $msg'out_amount, $msg'mint_count, $msg'duration, $msg'owner_address, $msg'signature, $msg'max_claims)));
+    slice $stateInitAddress = $global_contractAddress(($stateInit'code, $stateInit'data));
+    $global_send($SendParameters$_constructor_to_value_mode_bounce_code_data($stateInitAddress, $value, 2, false, $stateInit'code, $stateInit'data));
+    $self'next_stake_id = ($self'next_stake_id + 1);
+    return (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury), ());
+}
+
+((slice, int, slice, slice, slice, cell, int, slice), slice) $StakeMaster$_fun_getJettonAddress((slice, int, slice, slice, slice, cell, int, slice) $self) impure inline_ref {
+    var (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury)) = $self;
+    var $fresh$ret_1 = $self'jetton_address;
+    return (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury), $fresh$ret_1);
+}
+
+((slice, int, slice, slice, slice, cell, int, slice), cell) $StakeMaster$_fun_getMetadata((slice, int, slice, slice, slice, cell, int, slice) $self) impure inline_ref {
+    var (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury)) = $self;
+    var $fresh$ret_2 = $self'metadata;
+    return (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury), $fresh$ret_2);
+}
+
+((slice, int, slice, slice, slice, cell, int, slice), slice) $StakeMaster$_fun_getFeeAddress((slice, int, slice, slice, slice, cell, int, slice) $self) impure inline_ref {
+    var (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury)) = $self;
+    var $fresh$ret_3 = $self'fee_address;
+    return (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury), $fresh$ret_3);
+}
+
+((slice, int, slice, slice, slice, cell, int, slice), slice) $StakeMaster$_fun_getNftAddress((slice, int, slice, slice, slice, cell, int, slice) $self) impure inline_ref {
+    var (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury)) = $self;
+    var $fresh$ret_4 = $self'nft_address;
+    return (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury), $fresh$ret_4);
+}
+
+((slice, int, slice, slice, slice, cell, int, slice), slice) $StakeMaster$_fun_getOwnerAddress((slice, int, slice, slice, slice, cell, int, slice) $self) impure inline_ref {
+    var (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury)) = $self;
+    var $fresh$ret_5 = $self'owner_address;
+    return (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury), $fresh$ret_5);
+}
+
+((slice, int, slice, slice, slice, cell, int, slice), int) $StakeMaster$_fun_getOwnerPubkey((slice, int, slice, slice, slice, cell, int, slice) $self) impure inline_ref {
+    var (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury)) = $self;
+    var $fresh$ret_6 = $self'owner_pubkey;
+    return (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury), $fresh$ret_6);
+}
+
+((slice, int, slice, slice, slice, cell, int, slice), int) $StakeMaster$_fun_nextStakeId((slice, int, slice, slice, slice, cell, int, slice) $self) impure inline_ref {
+    var (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury)) = $self;
+    var $fresh$ret_7 = $self'next_stake_id;
+    return (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury), $fresh$ret_7);
+}
+
+;;
+;; Receivers of a Contract StakeMaster
+;;
+
+(((slice, int, slice, slice, slice, cell, int, slice)), ()) $StakeMaster$_internal_binary_Deposit((slice, int, slice, slice, slice, cell, int, slice) $self, (int, int, int, int, int, slice, slice, int) $msg) impure inline {
+    var ($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury) = $self;
+    var ($msg'query_id, $msg'amount, $msg'out_amount, $msg'mint_count, $msg'duration, $msg'owner_address, $msg'signature, $msg'max_claims) = $msg;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    int $msgValue = $ctx'value;
+    throw_unless(53983, ($msgValue >= (10000000 * $msg'mint_count)));
+    throw_unless(61734, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    int $tonBalanceBeforeMsg = ($global_myBalance() - $msgValue);
+    int $storageFee = (20000000 - $global_min($tonBalanceBeforeMsg, 20000000));
+    $msgValue = ($msgValue - ($storageFee + 20000000));
+    ($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury)~$StakeMaster$_fun_deposit(($msg'query_id, $msg'amount, $msg'out_amount, $msg'mint_count, $msg'duration, $msg'owner_address, $msg'signature, $msg'max_claims), $msgValue, $self'jetton_address);
+    return (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury), ());
+}
+
+(((slice, int, slice, slice, slice, cell, int, slice)), ()) $StakeMaster$_internal_binary_DoMint((slice, int, slice, slice, slice, cell, int, slice) $self, (int, slice, slice, slice, int, int, slice, int) $msg) impure inline {
+    var ($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury) = $self;
+    var ($msg'query_id, $msg'receiver, $msg'sender, $msg'signature, $msg'mint_count, $msg'amount, $msg'wallet_address, $msg'fees) = $msg;
+    throw_unless(4429, ( __tact_slice_eq_bits($msg'sender, __tact_context_get_sender()) ));
+    int $validate = $Cell$_fun_hash($Builder$_fun_endCell(__tact_store_address(__tact_store_address(__tact_store_address(store_uint($global_beginCell(), $msg'query_id, 64), $msg'receiver), $msg'sender), $msg'wallet_address)));
+    int $signature_valid = $global_checkSignature($validate, $msg'signature, $self'owner_pubkey);
+    throw_unless(48401, $signature_valid);
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    int $msgValue = $ctx'value;
+    int $requiredForMint = ($msg'mint_count * 11000000);
+    throw_unless(5165, ($msgValue >= $requiredForMint));
+    if (($msg'mint_count > 0)) {
+        int $i = 0;
+        cell $mintDict = new_dict();
+        while (($i < $msg'mint_count)) {
+            int $index = $global_random(0, 6);
+            cell $metadata = __tact_not_null(__tact_dict_get_int_cell($self'metadata, 257, $index));
+            cell $nftContentCell = $Builder$_fun_endCell(__tact_store_address($Builder$_fun_storeRef(__tact_store_address($global_beginCell(), $msg'receiver), $metadata), $self'treasury));
+            cell $itemCell = $Builder$_fun_endCell($Builder$_fun_storeRef($Builder$_fun_storeCoins($global_beginCell(), 10000000), $nftContentCell));
+            $mintDict = udict_set($mintDict, 64, $i, $Cell$_fun_asSlice($itemCell));
+            $i = ($i + 1);
+        }
+        if (__tact_cell_neq($global_emptyCell(), $mintDict)) {
+            cell $mintMsg = $Builder$_fun_endCell($Builder$_fun_storeRef(store_uint(store_uint($global_beginCell(), 2, 32), $msg'query_id, 64), $mintDict));
+            int $mintValue = ((11000000 * $msg'mint_count) + 50000000);
+            $global_send($SendParameters$_constructor_to_value_mode_bounce_body($self'nft_address, $mintValue, 1, false, $mintMsg));
+            $msgValue = ($msgValue - $mintValue);
+        }
+    }
+    cell $transferMsg = $Builder$_fun_endCell(__tact_store_bool($Builder$_fun_storeCoins(__tact_store_bool(store_uint(__tact_store_address($Builder$_fun_storeCoins(store_uint(store_uint($global_beginCell(), 260734629, 32), $msg'query_id, 64), $msg'amount), $msg'receiver), 0, 2), false), 0), false));
+    $global_send($SendParameters$_constructor_to_value_mode_bounce_body($msg'wallet_address, 50000000, 1, false, $transferMsg));
+    $msgValue = ((($msgValue - 40000000) - 50000000) - $Context$_fun_readForwardFee(($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw)));
+    int $balance = $global_myBalance();
+    if (($balance < $msgValue)) {
+        $msgValue = 0;
+    }
+    if (($msgValue > 0)) {
+        $global_send($SendParameters$_constructor_to_value_mode_bounce_body($self'fee_address, $msgValue, 2, false, $Claimed$_store_cell($Claimed$_constructor_query_id($msg'query_id))));
+    }
+    return (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury), ());
+}
+
+(((slice, int, slice, slice, slice, cell, int, slice)), ()) $StakeMaster$_internal_binary_TokenExcesses((slice, int, slice, slice, slice, cell, int, slice) $self, (int) $msg) impure inline {
+    var ($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury) = $self;
+    var ($msg'queryId) = $msg;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    int $msgValue = $ctx'value;
+    $global_send($SendParameters$_constructor_to_value_mode_bounce_body($self'owner_address, $msgValue, 2, false, $TokenExcesses$_store_cell(($msg'queryId))));
+    return (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury), ());
+}
+
+(((slice, int, slice, slice, slice, cell, int, slice)), ()) $StakeMaster$_internal_binary_TokenNotification((slice, int, slice, slice, slice, cell, int, slice) $self, (int, int, slice, slice) $msg) impure inline {
+    var ($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury) = $self;
+    var ($msg'query_id, $msg'amount, $msg'from, $msg'forward_payload) = $msg;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    int $msgValue = $ctx'value;
+    var ($depositMsg'query_id, $depositMsg'amount, $depositMsg'out_amount, $depositMsg'mint_count, $depositMsg'duration, $depositMsg'owner_address, $depositMsg'signature, $depositMsg'max_claims) = $Deposit$_load_not_mut($Slice$_fun_loadRef$not_mut($Cell$_fun_beginParse($msg'forward_payload~$Slice$_fun_loadRef())).begin_parse());
+    $depositMsg'owner_address = $msg'from;
+    $depositMsg'amount = $msg'amount;
+    ($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury)~$StakeMaster$_fun_deposit(($depositMsg'query_id, $depositMsg'amount, $depositMsg'out_amount, $depositMsg'mint_count, $depositMsg'duration, $depositMsg'owner_address, $depositMsg'signature, $depositMsg'max_claims), ($msgValue - 40000000), $ctx'sender);
+    return (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury), ());
+}
+
+(((slice, int, slice, slice, slice, cell, int, slice)), ()) $StakeMaster$_internal_binary_ProxyMsg((slice, int, slice, slice, slice, cell, int, slice) $self, (int, slice, int, cell) $msg) impure inline {
+    var ($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury) = $self;
+    var ($msg'query_id, $msg'to, $msg'value, $msg'body) = $msg;
+    throw_unless(12603, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    $global_send($SendParameters$_constructor_to_mode_value_body_bounce($msg'to, 64, $msg'value, $msg'body, false));
+    return (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury), ());
+}
+
+(((slice, int, slice, slice, slice, cell, int, slice)), ()) $StakeMaster$_internal_binary_UpdateFeeAddress((slice, int, slice, slice, slice, cell, int, slice) $self, (int, slice) $msg) impure inline {
+    var ($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury) = $self;
+    var ($msg'query_id, $msg'new_fee_address) = $msg;
+    throw_unless(59508, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    $self'fee_address = $msg'new_fee_address;
+    return (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury), ());
+}
+
+(((slice, int, slice, slice, slice, cell, int, slice)), ()) $StakeMaster$_internal_binary_UpdateNftAddress((slice, int, slice, slice, slice, cell, int, slice) $self, (int, slice) $msg) impure inline {
+    var ($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury) = $self;
+    var ($msg'query_id, $msg'new_nft_address) = $msg;
+    throw_unless(21750, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    $self'nft_address = $msg'new_nft_address;
+    return (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury), ());
+}
+
+(((slice, int, slice, slice, slice, cell, int, slice)), ()) $StakeMaster$_internal_binary_UpdateJettonAddress((slice, int, slice, slice, slice, cell, int, slice) $self, (int, slice) $msg) impure inline {
+    var ($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury) = $self;
+    var ($msg'query_id, $msg'new_jetton_address) = $msg;
+    throw_unless(15215, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    $self'jetton_address = $msg'new_jetton_address;
+    return (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury), ());
+}
+
+(((slice, int, slice, slice, slice, cell, int, slice)), ()) $StakeMaster$_internal_binary_TransferOwnership((slice, int, slice, slice, slice, cell, int, slice) $self, (int, slice) $msg) impure inline {
+    var ($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury) = $self;
+    var ($msg'query_id, $msg'new_owner) = $msg;
+    throw_unless(62971, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    $self'owner_address = $msg'new_owner;
+    return (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury), ());
+}
+
+(((slice, int, slice, slice, slice, cell, int, slice)), ()) %$StakeMaster$_internal_empty((slice, int, slice, slice, slice, cell, int, slice) $self) impure inline {
+    var ($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury) = $self;
+    throw_unless(34646, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    return (($self'owner_address, $self'owner_pubkey, $self'nft_address, $self'jetton_address, $self'fee_address, $self'metadata, $self'next_stake_id, $self'treasury), ());
+}
+
+;;
+;; Get methods of a Contract StakeMaster
+;;
+
+_ %getStakeStateInit(tuple $msg) method_id(115147) {
+    (int, int, int, int, int, slice, slice, int) $msg = $Deposit$_from_tuple($msg);
+    var self = $StakeMaster$_contract_load();
+    var res = self~$StakeMaster$_fun_getStakeStateInit($msg);
+    return $StateInit$_to_external(res);
+}
+
+_ %getJettonAddress() method_id(82160) {
+    var self = $StakeMaster$_contract_load();
+    var res = self~$StakeMaster$_fun_getJettonAddress();
+    return res;
+}
+
+_ %getMetadata() method_id(91290) {
+    var self = $StakeMaster$_contract_load();
+    var res = self~$StakeMaster$_fun_getMetadata();
+    return res;
+}
+
+_ %getFeeAddress() method_id(115192) {
+    var self = $StakeMaster$_contract_load();
+    var res = self~$StakeMaster$_fun_getFeeAddress();
+    return res;
+}
+
+_ %getNftAddress() method_id(122000) {
+    var self = $StakeMaster$_contract_load();
+    var res = self~$StakeMaster$_fun_getNftAddress();
+    return res;
+}
+
+_ %getOwnerAddress() method_id(91429) {
+    var self = $StakeMaster$_contract_load();
+    var res = self~$StakeMaster$_fun_getOwnerAddress();
+    return res;
+}
+
+_ %getOwnerPubkey() method_id(87083) {
+    var self = $StakeMaster$_contract_load();
+    var res = self~$StakeMaster$_fun_getOwnerPubkey();
+    return res;
+}
+
+_ %nextStakeId() method_id(92018) {
+    var self = $StakeMaster$_contract_load();
+    var res = self~$StakeMaster$_fun_nextStakeId();
+    return res;
+}
+
+_ lazy_deployment_completed() method_id {
+    return get_data().begin_parse().load_int(1);
+}
+
+;;
+;; Routing of a Contract StakeMaster
+;;
+
+((slice, int, slice, slice, slice, cell, int, slice), int) $StakeMaster$_contract_router_internal((slice, int, slice, slice, slice, cell, int, slice) self, int msg_bounced, slice in_msg) impure inline_ref {
+    ;; Handle bounced messages
+    if (msg_bounced) {
+        return (self, true);
+    }
+    
+    ;; Parse incoming message
+    int op = 0;
+    if (slice_bits(in_msg) >= 32) {
+        op = in_msg.preload_uint(32);
+    }
+    
+    
+    ;; Receive Deposit message
+    if (op == 69877033) {
+        var msg = in_msg~$Deposit$_load();
+        self~$StakeMaster$_internal_binary_Deposit(msg);
+        return (self, true);
+    }
+    
+    ;; Receive DoMint message
+    if (op == 2793121783) {
+        var msg = in_msg~$DoMint$_load();
+        self~$StakeMaster$_internal_binary_DoMint(msg);
+        return (self, true);
+    }
+    
+    ;; Receive TokenExcesses message
+    if (op == 0xd53276db) {
+        var msg = in_msg~$TokenExcesses$_load();
+        self~$StakeMaster$_internal_binary_TokenExcesses(msg);
+        return (self, true);
+    }
+    
+    ;; Receive TokenNotification message
+    if (op == 0x7362d09c) {
+        var msg = in_msg~$TokenNotification$_load();
+        self~$StakeMaster$_internal_binary_TokenNotification(msg);
+        return (self, true);
+    }
+    
+    ;; Receive ProxyMsg message
+    if (op == 3891826139) {
+        var msg = in_msg~$ProxyMsg$_load();
+        self~$StakeMaster$_internal_binary_ProxyMsg(msg);
+        return (self, true);
+    }
+    
+    ;; Receive UpdateFeeAddress message
+    if (op == 130433518) {
+        var msg = in_msg~$UpdateFeeAddress$_load();
+        self~$StakeMaster$_internal_binary_UpdateFeeAddress(msg);
+        return (self, true);
+    }
+    
+    ;; Receive UpdateNftAddress message
+    if (op == 3529429755) {
+        var msg = in_msg~$UpdateNftAddress$_load();
+        self~$StakeMaster$_internal_binary_UpdateNftAddress(msg);
+        return (self, true);
+    }
+    
+    ;; Receive UpdateJettonAddress message
+    if (op == 2933033334) {
+        var msg = in_msg~$UpdateJettonAddress$_load();
+        self~$StakeMaster$_internal_binary_UpdateJettonAddress(msg);
+        return (self, true);
+    }
+    
+    ;; Receive TransferOwnership message
+    if (op == 1800991741) {
+        var msg = in_msg~$TransferOwnership$_load();
+        self~$StakeMaster$_internal_binary_TransferOwnership(msg);
+        return (self, true);
+    }
+    
+    ;; Receive empty message
+    if ((op == 0) & (slice_bits(in_msg) <= 32)) {
+        self~%$StakeMaster$_internal_empty();
+        return (self, true);
+    }
+    
+    return (self, false);
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    var msg_flags = cs~load_uint(4);
+    var msg_bounced = -(msg_flags & 1);
+    slice msg_sender_addr = __tact_verify_address(cs~load_msg_addr());
+    __tact_context = (msg_bounced, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var self = $StakeMaster$_contract_load();
+    
+    ;; Handle operation
+    int handled = self~$StakeMaster$_contract_router_internal(msg_bounced, in_msg);
+    
+    ;; Throw if not handled
+    throw_unless(130, handled);
+    
+    ;; Persist state
+    $StakeMaster$_contract_store(self);
+}

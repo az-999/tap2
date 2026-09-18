@@ -1,0 +1,1542 @@
+PROGRAM{
+  DECLPROC __tact_verify_address
+  DECLPROC __tact_load_address
+  DECLPROC __tact_store_address
+  DECLPROC __tact_store_address_opt
+  DECLPROC __tact_create_address
+  DECLPROC __tact_compute_contract_address
+  DECLPROC __tact_my_balance
+  DECLPROC __tact_not_null
+  DECLPROC __tact_context_get
+  DECLPROC __tact_context_get_sender
+  DECLPROC __tact_store_bool
+  DECLPROC __tact_slice_eq_bits
+  DECLPROC __tact_dict_set_code
+  DECLPROC __tact_dict_get_code
+  DECLPROC __tact_string_builder_start
+  DECLPROC __tact_string_builder_start_string
+  DECLPROC __tact_string_builder_end
+  DECLPROC __tact_string_builder_append
+  DECLPROC $Deploy$_load
+  DECLPROC $DeployOk$_store
+  DECLPROC $DeployOk$_store_cell
+  DECLPROC $WithdrawFunds$_load
+  DECLPROC $WithdrawalConfirmation$_store
+  DECLPROC $WithdrawalConfirmation$_store_cell
+  DECLPROC $UpdatePublicKey$_load
+  DECLPROC $AssembleShipMessage$_load
+  DECLPROC $UpgradeShip$_load
+  DECLPROC $MintNFT$_load
+  DECLPROC $Excesses$_load
+  DECLPROC $ChangeHighload$_load
+  DECLPROC $ChangeTreasury$_load
+  DECLPROC $SetPause$_load
+  DECLPROC $Transfer$_store
+  DECLPROC $Transfer$_store_cell
+  DECLPROC $RoyaltyParams$_store
+  DECLPROC $RoyaltyParams$_load
+  DECLPROC $ChangeRoyaltyParams$_load
+  DECLPROC $GetRoyaltyParams$_load
+  DECLPROC $ReportRoyaltyParams$_store
+  DECLPROC $ReportRoyaltyParams$_store_cell
+  DECLPROC $Destroy$_store
+  DECLPROC $Destroy$_store_cell
+  DECLPROC $ShipAssembler$_store
+  DECLPROC $ShipAssembler$_load
+  DECLPROC $StateInit$_not_null
+  DECLPROC $StateInit$_to_external
+  DECLPROC $CollectionData$_to_external
+  DECLPROC $ShipAssembler$init$_load
+  DECLPROC $ShipNFT$init$_store
+  DECLPROC $ShipAssembler$_contract_init
+  DECLPROC $ShipAssembler$_contract_load
+  DECLPROC $ShipAssembler$_contract_store
+  DECLPROC $global_emptyCell
+  DECLPROC $Cell$_fun_asSlice
+  DECLPROC $global_emptySlice
+  DECLPROC $global_contractAddress
+  DECLPROC $global_send
+  DECLPROC $Context$_fun_readForwardFee
+  DECLPROC $ShipAssembler$_fun_msgValue
+  DECLPROC $ShipAssembler$_fun_verifySignature
+  DECLPROC $SendParameters$_constructor_to_value_bounce_body
+  DECLPROC $Destroy$_constructor_query_id
+  DECLPROC $ShipAssembler$_fun_burnNFT
+  DECLPROC $SendParameters$_constructor_to_value_bounce_body_code_data
+  DECLPROC $Transfer$_constructor_query_id_new_owner_response_destination_custom_payload_forward_amount_forward_payload
+  DECLPROC $ShipNFT$_init_child
+  DECLPROC $ShipAssembler$_fun_getNftItemInit
+  DECLPROC $ShipAssembler$_fun_mint
+  DECLPROC $ShipAssembler$_fun_getOwner
+  DECLPROC $ShipAssembler$_fun_get_nft_address_by_index
+  DECLPROC $ShipAssembler$_fun_get_nft_content
+  DECLPROC $CollectionData$_constructor_next_item_index_collection_content_owner_address
+  DECLPROC $ShipAssembler$_fun_get_collection_data
+  DECLPROC $SendParameters$_constructor_bounce_to_value_mode_body_code_data
+  DECLPROC $ShipAssembler$_fun_forward
+  DECLPROC $ShipAssembler$_fun_notify
+  DECLPROC $WithdrawalConfirmation$_constructor_query_id_amount
+  DECLPROC $SendParameters$_constructor_to_value_mode_bounce_body
+  DECLPROC $ReportRoyaltyParams$_constructor_query_id_numerator_denominator_destination
+  DECLPROC $DeployOk$_constructor_queryId
+  DECLPROC $ShipAssembler$_internal_binary_AssembleShipMessage
+  DECLPROC $ShipAssembler$_internal_binary_UpgradeShip
+  DECLPROC $ShipAssembler$_internal_binary_MintNFT
+  DECLPROC $ShipAssembler$_internal_binary_UpdatePublicKey
+  DECLPROC $ShipAssembler$_internal_binary_WithdrawFunds
+  DECLPROC $ShipAssembler$_internal_binary_Excesses
+  DECLPROC $ShipAssembler$_internal_binary_ChangeHighload
+  DECLPROC $ShipAssembler$_internal_binary_ChangeTreasury
+  DECLPROC $ShipAssembler$_internal_binary_ChangeRoyaltyParams
+  DECLPROC $ShipAssembler$_internal_binary_SetPause
+  DECLPROC $ShipAssembler$_internal_binary_GetRoyaltyParams
+  DECLPROC %$ShipAssembler$_internal_empty
+  DECLPROC $ShipAssembler$_internal_binary_Deploy
+  81078 DECLMETHOD %getNftItemInit
+  102025 DECLMETHOD %getOwner
+  92067 DECLMETHOD %get_nft_address_by_index
+  68445 DECLMETHOD %get_nft_content
+  102491 DECLMETHOD %get_collection_data
+  115390 DECLMETHOD lazy_deployment_completed
+  DECLPROC $ShipAssembler$_contract_router_internal
+  DECLPROC recv_internal
+  DECLGLOBVAR __tact_context
+  DECLGLOBVAR __tact_context_sender
+  DECLGLOBVAR __tact_context_sys
+  DECLGLOBVAR __tact_randomized
+  __tact_verify_address PROCINLINE:<{
+    DUP
+    SBITS
+    267 PUSHINT
+    EQUAL
+    136 THROWIFNOT
+    DUP
+    11 PLDU
+    DUP
+    1279 PUSHINT
+    EQUAL
+    137 THROWIF
+    10 PUSHPOW2
+    EQUAL
+    136 THROWIFNOT
+  }>
+  __tact_load_address PROCINLINE:<{
+    LDMSGADDR
+    SWAP
+    __tact_verify_address INLINECALLDICT
+  }>
+  __tact_store_address PROCINLINE:<{
+    __tact_verify_address INLINECALLDICT
+    STSLICER
+  }>
+  __tact_store_address_opt PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      0 PUSHINT
+      SWAP
+      2 STU
+    }>ELSE<{
+      __tact_store_address INLINECALLDICT
+    }>
+  }>
+  __tact_create_address PROCINLINE:<{
+    NEWC
+    2 PUSHINT
+    SWAP
+    2 STU
+    0 PUSHINT
+    SWAP
+    1 STU
+    s1 s2 XCHG
+    8 STI
+    256 STU
+    ENDC
+    CTOS
+    __tact_verify_address INLINECALLDICT
+  }>
+  __tact_compute_contract_address PROCINLINE:<{
+    NEWC
+    0 PUSHINT
+    SWAP
+    2 STU
+    3 PUSHINT
+    SWAP
+    2 STU
+    0 PUSHINT
+    SWAP
+    1 STU
+    s1 s2 XCHG
+    STREF
+    STREF
+    ENDC
+    HASHCU
+    __tact_create_address INLINECALLDICT
+  }>
+  __tact_my_balance PROCINLINE:<{
+    BALANCE
+    FIRST
+  }>
+  __tact_not_null PROCINLINE:<{
+    DUP
+    ISNULL
+    128 THROWIF
+  }>
+  __tact_context_get PROCINLINE:<{
+    __tact_context GETGLOB
+    4 UNTUPLE
+  }>
+  __tact_context_get_sender PROCINLINE:<{
+    __tact_context_sender GETGLOB
+  }>
+  __tact_store_bool PROCINLINE:<{
+    SWAP
+    1 STI
+  }>
+  __tact_slice_eq_bits PROCINLINE:<{
+    SDEQ
+  }>
+  __tact_dict_set_code PROCINLINE:<{
+    s0 s2 XCHG
+    16 PUSHINT
+    DICTUSETREF
+  }>
+  __tact_dict_get_code PROCINLINE:<{
+    SWAP
+    16 PUSHINT
+    DICTUGETREF
+    NULLSWAPIFNOT
+    135 THROWIFNOT
+  }>
+  __tact_string_builder_start PROCINLINE:<{
+    NIL
+    SWAP
+    TPUSH
+    PUSHNULL
+    TPUSH
+  }>
+  __tact_string_builder_start_string PROCINLINE:<{
+    NEWC
+    __tact_string_builder_start INLINECALLDICT
+  }>
+  __tact_string_builder_end PROCINLINE:<{
+    UNCONS
+    SWAP
+    ENDC
+    WHILE:<{
+      OVER
+      ISNULL
+      NOT
+    }>DO<{
+      SWAP
+      UNCONS
+      -ROT
+      STREF
+      ENDC
+    }>
+    NIP
+  }>
+  __tact_string_builder_append PROCREF:<{
+    DUP
+    SREFS
+    OVER
+    SBITS
+    WHILE:<{
+      DUP
+      0 GTINT
+      s2 PUSH
+      0 GTINT
+      OR
+    }>DO<{
+      s0 s3 XCHG
+      UNCONS
+      127 PUSHINT
+      s2 PUSH
+      BBITS
+      3 RSHIFT#
+      SUB
+      s0 s5 XCHG
+      3 RSHIFT#
+      s5 s5 XCPU
+      MIN
+      DUP
+      0 GTINT
+      IF:<{
+        DUP
+        3 LSHIFT#
+        s1 s5 XCHG
+        LDSLICEX
+        s3 s3 XCHG2
+        STSLICER
+        s0 s1 s4 XCHG3
+      }>
+      -ROT
+      CONS
+      s4 s1 PUSH2
+      SUB
+      0 GTINT
+      IF:<{
+        NEWC
+        SWAP
+        CONS
+        s4 s4 XCHG2
+        SUB
+        3 LSHIFT#
+      }>ELSE<{
+        NIP
+        s3 POP
+        0 GTINT
+        IF:<{
+          LDREF
+          DROP
+          CTOS
+          DUP
+          SREFS
+          OVER
+          SBITS
+        }>ELSE<{
+          0 PUSHINT
+          DUP
+        }>
+      }>
+    }>
+    3 BLKDROP
+  }>
+  $Deploy$_load PROCINLINE:<{
+    32 LDU
+    SWAP
+    2490013878 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    64 LDU
+    SWAP
+  }>
+  $DeployOk$_store PROCINLINE:<{
+    2952335191 PUSHINT
+    ROT
+    32 STU
+    64 STU
+  }>
+  $DeployOk$_store_cell PROCINLINE:<{
+    NEWC
+    SWAP
+    $DeployOk$_store INLINECALLDICT
+    ENDC
+  }>
+  $WithdrawFunds$_load PROCINLINE:<{
+    32 LDU
+    SWAP
+    2050115519 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    257 PUSHINT
+    LDIX
+    SWAP
+  }>
+  $WithdrawalConfirmation$_store PROCINLINE:<{
+    s0 s2 XCHG
+    257 PUSHINT
+    STIX
+    257 PUSHINT
+    STIX
+  }>
+  $WithdrawalConfirmation$_store_cell PROCINLINE:<{
+    NEWC
+    -ROT
+    $WithdrawalConfirmation$_store INLINECALLDICT
+    ENDC
+  }>
+  $UpdatePublicKey$_load PROCINLINE:<{
+    32 LDU
+    SWAP
+    1766758178 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    257 PUSHINT
+    LDIX
+    257 PUSHINT
+    LDIX
+    -ROT
+  }>
+  $AssembleShipMessage$_load PROCREF:<{
+    32 LDU
+    SWAP
+    1997904914 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    __tact_load_address INLINECALLDICT
+    SWAP
+    __tact_load_address INLINECALLDICT
+    SWAP
+    __tact_load_address INLINECALLDICT
+    SWAP
+    LDREF
+    SWAP
+    CTOS
+    __tact_load_address INLINECALLDICT
+    SWAP
+    __tact_load_address INLINECALLDICT
+    SWAP
+    __tact_load_address INLINECALLDICT
+    SWAP
+    LDREF
+    DROP
+    CTOS
+    257 PUSHINT
+    LDIX
+    LDREF
+    DROP
+    CTOS
+    s5 s8 XCHG
+    s5 s7 XCHG
+    s5 s6 XCHG
+  }>
+  $UpgradeShip$_load PROCREF:<{
+    32 LDU
+    SWAP
+    74989363 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    __tact_load_address INLINECALLDICT
+    SWAP
+    __tact_load_address INLINECALLDICT
+    SWAP
+    __tact_load_address INLINECALLDICT
+    SWAP
+    LDREF
+    SWAP
+    CTOS
+    __tact_load_address INLINECALLDICT
+    SWAP
+    __tact_load_address INLINECALLDICT
+    SWAP
+    __tact_load_address INLINECALLDICT
+    SWAP
+    LDREF
+    DROP
+    CTOS
+    __tact_load_address INLINECALLDICT
+    SWAP
+    LDREF
+    257 PUSHINT
+    LDIX
+    LDREF
+    DROP
+    CTOS
+    s7 s10 XCHG
+    s7 s9 XCHG
+    s7 s8 XCHG
+  }>
+  $MintNFT$_load PROCINLINE:<{
+    32 LDU
+    SWAP
+    386813437 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    257 PUSHINT
+    LDIX
+    SWAP
+  }>
+  $Excesses$_load PROCINLINE:<{
+    32 LDU
+    SWAP
+    3576854235 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    64 LDU
+    SWAP
+  }>
+  $ChangeHighload$_load PROCINLINE:<{
+    32 LDU
+    SWAP
+    2316713580 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    __tact_load_address INLINECALLDICT
+  }>
+  $ChangeTreasury$_load PROCINLINE:<{
+    32 LDU
+    SWAP
+    370798756 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    __tact_load_address INLINECALLDICT
+  }>
+  $SetPause$_load PROCINLINE:<{
+    32 LDU
+    SWAP
+    163970072 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    1 LDI
+    SWAP
+  }>
+  $Transfer$_store PROCREF:<{
+    1607220500 PUSHINT
+    s0 s7 XCHG2
+    32 STU
+    s1 s5 XCHG
+    64 STU
+    s0 s3 XCHG2
+    __tact_store_address INLINECALLDICT
+    SWAP
+    __tact_store_address_opt INLINECALLDICT
+    OVER
+    ISNULL
+    NOT
+    IF:<{
+      TRUE
+      SWAP
+      1 STI
+      STREF
+    }>ELSE<{
+      FALSE
+      s2 POP
+      1 STI
+    }>
+    SWAP
+    STGRAMS
+    SWAP
+    STSLICER
+  }>
+  $Transfer$_store_cell PROCINLINE:<{
+    NEWC
+    6 -ROLL
+    $Transfer$_store INLINECALLDICT
+    ENDC
+  }>
+  $RoyaltyParams$_store PROCINLINE:<{
+    s2 s3 XCHG2
+    257 PUSHINT
+    STIX
+    257 PUSHINT
+    STIX
+    SWAP
+    __tact_store_address INLINECALLDICT
+  }>
+  $RoyaltyParams$_load PROCINLINE:<{
+    257 PUSHINT
+    LDIX
+    257 PUSHINT
+    LDIX
+    __tact_load_address INLINECALLDICT
+    s3 s3 s0 XCHG3
+  }>
+  $ChangeRoyaltyParams$_load PROCINLINE:<{
+    32 LDU
+    SWAP
+    1209124053 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    257 PUSHINT
+    LDIX
+    257 PUSHINT
+    LDIX
+    __tact_load_address INLINECALLDICT
+    s3 s3 s0 XCHG3
+  }>
+  $GetRoyaltyParams$_load PROCINLINE:<{
+    32 LDU
+    SWAP
+    1765620048 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    64 LDU
+    SWAP
+  }>
+  $ReportRoyaltyParams$_store PROCINLINE:<{
+    2831876269 PUSHINT
+    s0 s5 XCHG2
+    32 STU
+    s1 s3 XCHG
+    64 STU
+    16 STU
+    16 STU
+    SWAP
+    __tact_store_address INLINECALLDICT
+  }>
+  $ReportRoyaltyParams$_store_cell PROCINLINE:<{
+    NEWC
+    4 -ROLL
+    $ReportRoyaltyParams$_store INLINECALLDICT
+    ENDC
+  }>
+  $Destroy$_store PROCINLINE:<{
+    520377210 PUSHINT
+    ROT
+    32 STU
+    64 STU
+  }>
+  $Destroy$_store_cell PROCINLINE:<{
+    NEWC
+    SWAP
+    $Destroy$_store INLINECALLDICT
+    ENDC
+  }>
+  $ShipAssembler$_store PROCINLINE:<{
+    s10 s11 XCHG2
+    1 STI
+    s0 s8 XCHG2
+    __tact_store_address INLINECALLDICT
+    s0 s6 XCHG2
+    __tact_store_address INLINECALLDICT
+    s0 s4 XCHG2
+    __tact_store_address INLINECALLDICT
+    s0 s2 XCHG
+    NEWC
+    257 PUSHINT
+    STIX
+    257 PUSHINT
+    STIX
+    s1 s2 XCHG
+    STREF
+    s1 s2 XCHG
+    STREF
+    NEWC
+    s3 s1 s3 XCHG3
+    s4 s5 XCHG2
+    $RoyaltyParams$_store INLINECALLDICT
+    ENDC
+    SWAP
+    STREF
+    ENDC
+    SWAP
+    STREF
+  }>
+  $ShipAssembler$_load PROCINLINE:<{
+    1 LDI
+    __tact_load_address INLINECALLDICT
+    SWAP
+    __tact_load_address INLINECALLDICT
+    SWAP
+    __tact_load_address INLINECALLDICT
+    SWAP
+    LDREF
+    SWAP
+    CTOS
+    257 PUSHINT
+    LDIX
+    257 PUSHINT
+    LDIX
+    LDREF
+    LDREF
+    LDREF
+    DROP
+    CTOS
+    $RoyaltyParams$_load INLINECALLDICT
+    s3 POP
+    s7 s11 XCHG
+    s7 s10 XCHG
+    s7 s9 XCHG
+    s7 s8 XCHG
+    ROT
+  }>
+  $StateInit$_not_null PROCINLINE:<{
+    DUP
+    ISNULL
+    128 THROWIF
+    2 UNTUPLE
+  }>
+  $StateInit$_to_external PROCINLINE:<{
+  }>
+  $CollectionData$_to_external PROCINLINE:<{
+  }>
+  $ShipAssembler$init$_load PROCREF:<{
+    __tact_load_address INLINECALLDICT
+    SWAP
+    __tact_load_address INLINECALLDICT
+    SWAP
+    __tact_load_address INLINECALLDICT
+    SWAP
+    LDREF
+    SWAP
+    CTOS
+    $RoyaltyParams$_load INLINECALLDICT
+    s0 s3 XCHG
+    LDREF
+    DROP
+    CTOS
+    257 PUSHINT
+    LDIX
+    LDREF
+    LDREF
+    DROP
+    s6 s9 XCHG
+    s6 s8 XCHG
+    s6 s7 XCHG
+    s4 s5 XCHG
+    s3 s4 XCHG
+  }>
+  $ShipNFT$init$_store PROCINLINE:<{
+    -ROT
+    __tact_store_address INLINECALLDICT
+    257 PUSHINT
+    STIX
+  }>
+  $ShipAssembler$_contract_init PROCREF:<{
+    FALSE
+    s0 s9 XCHG
+    s0 s8 XCHG
+    s0 s7 XCHG
+    s0 s6 XCHG
+    s3 s5 XCHG
+    0 PUSHINT
+    s0 s5 XCHG
+    s3 s4 XCHG
+    s1 s3 s0 XCHG3
+  }>
+  $ShipAssembler$_contract_load PROCREF:<{
+    c4 PUSH
+    CTOS
+    LDREF
+    SWAP
+    __tact_context_sys SETGLOB
+    1 LDI
+    SWAP
+    IFJMP:<{
+      $ShipAssembler$_load INLINECALLDICT
+      1 11 BLKDROP2
+    }>
+    MYADDR
+    11 PLDU
+    10 PUSHPOW2
+    EQUAL
+    137 THROWIFNOT
+    $ShipAssembler$init$_load INLINECALLDICT
+    s0 s9 XCHG
+    ENDS
+    8 ROLL
+    $ShipAssembler$_contract_init INLINECALLDICT
+  }>
+  $ShipAssembler$_contract_store PROCINLINE:<{
+    NEWC
+    __tact_context_sys GETGLOB
+    SWAP
+    STREF
+    TRUE
+    SWAP
+    1 STI
+    11 -ROLL
+    $ShipAssembler$_store INLINECALLDICT
+    ENDC
+    c4 POP
+  }>
+  $global_emptyCell PROCINLINE:<{
+    NEWC
+    ENDC
+  }>
+  $Cell$_fun_asSlice PROCINLINE:<{
+    CTOS
+  }>
+  $global_emptySlice PROCINLINE:<{
+    $global_emptyCell INLINECALLDICT
+    $Cell$_fun_asSlice INLINECALLDICT
+  }>
+  $global_contractAddress PROCINLINE:<{
+    0 PUSHINT
+    -ROT
+    __tact_compute_contract_address INLINECALLDICT
+  }>
+  $global_send PROCREF:<{
+    NEWC
+    1 PUSHINT
+    SWAP
+    2 STI
+    s0 s7 XCHG2
+    __tact_store_bool INLINECALLDICT
+    0 PUSHINT
+    SWAP
+    3 STI
+    s0 s5 XCHG2
+    __tact_store_address INLINECALLDICT
+    s0 s3 XCHG2
+    STGRAMS
+    0 PUSHINT
+    SWAP
+    105 STI
+    s3 PUSH
+    ISNULL
+    NOT
+    IF:<{
+      TRUE
+    }>ELSE<{
+      s4 PUSH
+      ISNULL
+      NOT
+    }>
+    IF:<{
+      TRUE
+      __tact_store_bool INLINECALLDICT
+      NEWC
+      FALSE
+      __tact_store_bool INLINECALLDICT
+      FALSE
+      __tact_store_bool INLINECALLDICT
+      s4 PUSH
+      ISNULL
+      NOT
+      IF:<{
+        TRUE
+        __tact_store_bool INLINECALLDICT
+        s0 s4 XCHG
+        __tact_not_null INLINECALLDICT
+        s0 s4 XCHG2
+        STREF
+      }>ELSE<{
+        s4 POP
+        s0 s3 XCHG
+        FALSE
+        __tact_store_bool INLINECALLDICT
+      }>
+      s4 PUSH
+      ISNULL
+      NOT
+      IF:<{
+        TRUE
+        __tact_store_bool INLINECALLDICT
+        s0 s4 XCHG
+        __tact_not_null INLINECALLDICT
+        s0 s4 XCHG2
+        STREF
+      }>ELSE<{
+        s4 POP
+        s0 s3 XCHG
+        FALSE
+        __tact_store_bool INLINECALLDICT
+      }>
+      FALSE
+      __tact_store_bool INLINECALLDICT
+      s0 s2 XCHG
+      TRUE
+      __tact_store_bool INLINECALLDICT
+      s0 s2 XCHG
+      ENDC
+      ROT
+      STREF
+    }>ELSE<{
+      s3 POP
+      s3 POP
+      SWAP
+      FALSE
+      __tact_store_bool INLINECALLDICT
+    }>
+    OVER
+    ISNULL
+    NOT
+    IF:<{
+      TRUE
+      __tact_store_bool INLINECALLDICT
+      SWAP
+      __tact_not_null INLINECALLDICT
+      SWAP
+      STREF
+    }>ELSE<{
+      NIP
+      FALSE
+      __tact_store_bool INLINECALLDICT
+    }>
+    ENDC
+    SWAP
+    SENDRAWMSG
+  }>
+  $Context$_fun_readForwardFee PROCREF:<{
+    3 1 BLKDROP2
+    __tact_load_address INLINECALLDICT
+    DROP
+    LDGRAMS
+    NIP
+    1 PUSHINT
+    SDSKIPFIRST
+    LDGRAMS
+    NIP
+    LDGRAMS
+    DROP
+    3 MULCONST
+    1 RSHIFT#
+  }>
+  $ShipAssembler$_fun_msgValue PROCREF:<{
+    __tact_my_balance INLINECALLDICT
+    OVER
+    SUB
+    20000000 PUSHINT
+    TUCK
+    MIN
+    SUB
+    20000000 PUSHINT
+    ADD
+    SUB
+  }>
+  $ShipAssembler$_fun_verifySignature PROCREF:<{
+    SWAP
+    NEWC
+    256 STU
+    ENDC
+    HASHCU
+    s1 s8 XCPU
+    CHKSIGNU
+  }>
+  $SendParameters$_constructor_to_value_bounce_body PROCINLINE:<{
+    s3 s3 s0 XCHG3
+    0 PUSHINT
+    SWAP
+    PUSHNULL
+    PUSHNULL
+  }>
+  $Destroy$_constructor_query_id PROCINLINE:<{
+  }>
+  $ShipAssembler$_fun_burnNFT PROCREF:<{
+    50000000 PUSHINT
+    TRUE
+    s8 PUSH
+    $Destroy$_constructor_query_id INLINECALLDICT
+    $Destroy$_store_cell INLINECALLDICT
+    $SendParameters$_constructor_to_value_bounce_body INLINECALLDICT
+    $global_send INLINECALLDICT
+  }>
+  $SendParameters$_constructor_to_value_bounce_body_code_data PROCINLINE:<{
+    s3 s5 XCHG
+    s3 s4 XCHG
+    0 PUSHINT
+    3 -ROLL
+  }>
+  $Transfer$_constructor_query_id_new_owner_response_destination_custom_payload_forward_amount_forward_payload PROCINLINE:<{
+  }>
+  $ShipNFT$_init_child PROCREF:<{
+    s0 s2 XCHG
+    CTOS
+    LDDICT
+    DROP
+    NEWDICT
+    SWAP
+    10285 PUSHINT
+    __tact_dict_get_code INLINECALLDICT
+    SWAP
+    10285 PUSHINT
+    s2 PUSH
+    __tact_dict_set_code INLINECALLDICT
+    NEWC
+    SWAP
+    NEWC
+    STDICT
+    ENDC
+    SWAP
+    STREF
+    FALSE
+    SWAP
+    1 STI
+    s0 s0 s3 XCHG3
+    $ShipNFT$init$_store INLINECALLDICT
+    ENDC
+  }>
+  $ShipAssembler$_fun_getNftItemInit PROCREF:<{
+    __tact_context_sys GETGLOB
+    MYADDR
+    ROT
+    $ShipNFT$_init_child INLINECALLDICT
+  }>
+  $ShipAssembler$_fun_mint PROCREF:<{
+    s0 s9 XCHG
+    INC
+    s10 s14 XCHG
+    DUP
+    s10 s14 XCHG
+    s9 s13 XCHG
+    s8 s12 XCHG
+    s7 s15 XCHG
+    s0 s6 XCHG
+    s5 s13 XCHG
+    s4 s12 XCHG
+    s3 s15 XCHG
+    s0 s13 s13 XCHG3
+    $ShipAssembler$_fun_getNftItemInit INLINECALLDICT
+    2DUP
+    $global_contractAddress INLINECALLDICT
+    FALSE
+    MYADDR
+    0 PUSHINT
+    $global_emptySlice INLINECALLDICT
+    s5 20 s() XCHG
+    s4 18 s() XCHG
+    s2 s3 XCHG
+    s2 19 s() XCHG
+    $Transfer$_constructor_query_id_new_owner_response_destination_custom_payload_forward_amount_forward_payload INLINECALLDICT
+    $Transfer$_store_cell INLINECALLDICT
+    s5 s13 XCHG
+    s4 16 s() XCHG
+    s3 s14 XCHG
+    s0 s1 s15 XCHG3
+    $SendParameters$_constructor_to_value_bounce_body_code_data INLINECALLDICT
+    $global_send INLINECALLDICT
+    s6 s10 XCHG
+    s5 s9 XCHG
+    s4 s8 XCHG
+    s3 s7 XCHG
+    s6 s4 s4 XCHG3
+    s0 s5 XCHG
+  }>
+  $ShipAssembler$_fun_getOwner PROCREF:<{
+    s9 PUSH
+  }>
+  $ShipAssembler$_fun_get_nft_address_by_index PROCREF:<{
+    $ShipAssembler$_fun_getNftItemInit INLINECALLDICT
+    $global_contractAddress INLINECALLDICT
+  }>
+  $ShipAssembler$_fun_get_nft_content PROCREF:<{
+    NIP
+    __tact_string_builder_start_string INLINECALLDICT
+    SWAP
+    $Cell$_fun_asSlice INLINECALLDICT
+    __tact_string_builder_append INLINECALLDICT
+    __tact_string_builder_end INLINECALLDICT
+  }>
+  $CollectionData$_constructor_next_item_index_collection_content_owner_address PROCINLINE:<{
+  }>
+  $ShipAssembler$_fun_get_collection_data PROCREF:<{
+    s4 PUSH
+    $Cell$_fun_asSlice INLINECALLDICT
+    DROP
+    s5 s4 s9 PUSH3
+    $CollectionData$_constructor_next_item_index_collection_content_owner_address INLINECALLDICT
+  }>
+  $SendParameters$_constructor_bounce_to_value_mode_body_code_data PROCINLINE:<{
+  }>
+  $ShipAssembler$_fun_forward PROCREF:<{
+    PUSHNULL
+    PUSHNULL
+    s2 PUSH
+    ISNULL
+    NOT
+    IF:<{
+      2DROP
+      $StateInit$_not_null INLINECALLDICT
+      SWAP
+    }>ELSE<{
+      s2 POP
+    }>
+    s2 s4 XCHG
+    0 PUSHINT
+    s0 s3 XCHG
+    s0 s4 XCHG
+    66 PUSHINT
+    s2 s3 XCHG2
+    $SendParameters$_constructor_bounce_to_value_mode_body_code_data INLINECALLDICT
+    $global_send INLINECALLDICT
+  }>
+  $ShipAssembler$_fun_notify PROCINLINE:<{
+    __tact_context_get_sender INLINECALLDICT
+    SWAP
+    FALSE
+    PUSHNULL
+    $ShipAssembler$_fun_forward INLINECALLDICT
+  }>
+  $WithdrawalConfirmation$_constructor_query_id_amount PROCINLINE:<{
+  }>
+  $SendParameters$_constructor_to_value_mode_bounce_body PROCINLINE:<{
+    s1 s4 XCHG
+    s3 s3 s0 XCHG3
+    PUSHNULL
+    PUSHNULL
+  }>
+  $ReportRoyaltyParams$_constructor_query_id_numerator_denominator_destination PROCINLINE:<{
+  }>
+  $DeployOk$_constructor_queryId PROCINLINE:<{
+  }>
+  $ShipAssembler$_internal_binary_AssembleShipMessage PROCINLINE:<{
+    18 s() PUSH
+    NOT
+    1629 THROWIFNOT
+    __tact_context_get INLINECALLDICT
+    s1 s3 XCHG
+    3 BLKDROP
+    __tact_context_get_sender INLINECALLDICT
+    s11 20 s() XCHG
+    s10 19 s() XCHG
+    s9 18 s() XCHG
+    s8 17 s() XCHG
+    s7 16 s() XCHG
+    s6 s15 XCHG
+    s5 s14 XCHG
+    s4 s13 XCHG
+    s3 s12 XCHG
+    s2 20 s() XCHG
+    s1 19 s() XCHG
+    s12 s(-1) PUXC
+    s0 21 s() XCHG
+    $ShipAssembler$_fun_verifySignature INLINECALLDICT
+    48401 PUSHINT
+    SWAP
+    THROWANYIFNOT
+    11 ROLL
+    s0 17 s() XCHG
+    $ShipAssembler$_fun_burnNFT INLINECALLDICT
+    11 ROLL
+    s0 s15 XCHG
+    $ShipAssembler$_fun_burnNFT INLINECALLDICT
+    11 ROLL
+    s0 s13 XCHG
+    $ShipAssembler$_fun_burnNFT INLINECALLDICT
+    11 ROLL
+    $ShipAssembler$_fun_burnNFT INLINECALLDICT
+    11 ROLL
+    $ShipAssembler$_fun_burnNFT INLINECALLDICT
+    11 ROLL
+    $ShipAssembler$_fun_burnNFT INLINECALLDICT
+    s0 s1 s2 PUSH3
+    s1 s15 XCHG
+    MUL
+    s0 s14 XCHG2
+    DIV
+    DUP
+    0 GTINT
+    IF:<{
+      s1 s13 XCHG
+      TRUE
+      PUSHNULL
+      $SendParameters$_constructor_to_value_bounce_body INLINECALLDICT
+      $global_send INLINECALLDICT
+    }>ELSE<{
+      DROP
+      s12 POP
+    }>
+    s2 PUSH
+    s10 s13 XCHG
+    s9 s12 XCHG
+    s8 s11 XCHG
+    s7 s10 XCHG
+    s6 s9 XCHG
+    s5 s8 XCHG
+    s4 s7 XCHG
+    s3 s6 XCHG
+    s2 s5 XCHG
+    100000000 PUSHINT
+    s0 s1 s5 XCHG3
+    s0 s3 XCHG
+    $ShipAssembler$_fun_mint INLINECALLDICT
+  }>
+  $ShipAssembler$_internal_binary_UpgradeShip PROCINLINE:<{
+    20 s() PUSH
+    NOT
+    1629 THROWIFNOT
+    __tact_context_get INLINECALLDICT
+    s1 s3 XCHG
+    3 BLKDROP
+    __tact_context_get_sender INLINECALLDICT
+    s11 22 s() XCHG
+    s10 21 s() XCHG
+    s9 20 s() XCHG
+    s8 19 s() XCHG
+    s7 18 s() XCHG
+    s6 17 s() XCHG
+    s5 16 s() XCHG
+    s4 s15 XCHG
+    s3 s14 XCHG
+    s13 s12 s0 XCHG3
+    s14 s13 PUXC
+    $ShipAssembler$_fun_verifySignature INLINECALLDICT
+    48401 PUSHINT
+    SWAP
+    THROWANYIFNOT
+    11 ROLL
+    s0 21 s() XCHG
+    $ShipAssembler$_fun_burnNFT INLINECALLDICT
+    11 ROLL
+    s0 19 s() XCHG
+    $ShipAssembler$_fun_burnNFT INLINECALLDICT
+    11 ROLL
+    s0 17 s() XCHG
+    $ShipAssembler$_fun_burnNFT INLINECALLDICT
+    11 ROLL
+    s0 s15 XCHG
+    $ShipAssembler$_fun_burnNFT INLINECALLDICT
+    11 ROLL
+    s0 s13 XCHG
+    $ShipAssembler$_fun_burnNFT INLINECALLDICT
+    11 ROLL
+    $ShipAssembler$_fun_burnNFT INLINECALLDICT
+    11 ROLL
+    $ShipAssembler$_fun_burnNFT INLINECALLDICT
+    s2 s1 s0 PUSH3
+    s1 17 s() XCHG
+    s0 s2 XCHG
+    MUL
+    SWAP
+    s0 16 s() XCHG
+    DIV
+    DUP
+    0 GTINT
+    IF:<{
+      s1 s15 XCHG
+      TRUE
+      PUSHNULL
+      $SendParameters$_constructor_to_value_bounce_body INLINECALLDICT
+      $global_send INLINECALLDICT
+    }>ELSE<{
+      DROP
+      s14 POP
+    }>
+    4 10 BLKSWAP
+    100000000 PUSHINT
+    s0 s2 XCHG
+    $ShipAssembler$_fun_mint INLINECALLDICT
+  }>
+  $ShipAssembler$_internal_binary_MintNFT PROCINLINE:<{
+    57579 PUSHINT
+    __tact_context_get_sender INLINECALLDICT
+    s12 s(-1) PUXC
+    __tact_slice_eq_bits INLINECALLDICT
+    THROWANYIFNOT
+    s11 PUSH
+    NOT
+    1629 THROWIFNOT
+    __tact_context_get INLINECALLDICT
+    s1 s3 XCHG
+    3 BLKDROP
+    53983 PUSHINT
+    OVER
+    50000000 PUSHINT
+    GEQ
+    THROWANYIFNOT
+    __tact_my_balance INLINECALLDICT
+    OVER
+    SUB
+    20000000 PUSHINT
+    TUCK
+    MIN
+    SUB
+    20000000 PUSHINT
+    ADD
+    SUB
+    s5 PUSH
+    __tact_context_get_sender INLINECALLDICT
+    s0 s3 XCHG
+    $ShipAssembler$_fun_mint INLINECALLDICT
+  }>
+  $ShipAssembler$_internal_binary_UpdatePublicKey PROCINLINE:<{
+    NIP
+    s7 POP
+    47429 PUSHINT
+    __tact_context_get_sender INLINECALLDICT
+    s11 s(-1) PUXC
+    __tact_slice_eq_bits INLINECALLDICT
+    THROWANYIFNOT
+  }>
+  $ShipAssembler$_internal_binary_WithdrawFunds PROCINLINE:<{
+    63433 PUSHINT
+    __tact_context_get_sender INLINECALLDICT
+    s12 s(-1) PUXC
+    __tact_slice_eq_bits INLINECALLDICT
+    THROWANYIFNOT
+    __tact_my_balance INLINECALLDICT
+    40000000 PUSHINT
+    SUB
+    58821 PUSHINT
+    OVER
+    0 GTINT
+    THROWANYIFNOT
+    FALSE
+    s2 s1 XCPU
+    $WithdrawalConfirmation$_constructor_query_id_amount INLINECALLDICT
+    $WithdrawalConfirmation$_store_cell INLINECALLDICT
+    s12 PUSH
+    s3 s3 XCHG2
+    $SendParameters$_constructor_to_value_bounce_body INLINECALLDICT
+    $global_send INLINECALLDICT
+  }>
+  $ShipAssembler$_internal_binary_Excesses PROCINLINE:<{
+    DROP
+    __tact_context_get INLINECALLDICT
+    s10 s14 XCHG
+    s9 s13 XCHG
+    s8 s12 XCHG
+    s7 s11 XCHG
+    s6 s14 XCHG
+    s5 s13 XCHG
+    s4 s12 XCHG
+    s3 s11 XCHG
+    s14 s13 s12 XCHG3
+    s13 PUSH
+    $ShipAssembler$_fun_msgValue INLINECALLDICT
+    s3 s12 XCHG
+    s15 s14 s13 XCHG3
+    $Context$_fun_readForwardFee INLINECALLDICT
+    s1 s10 XCHG
+    SUB
+    DUP
+    0 GTINT
+    IF:<{
+      s4 s(-1) PUXC
+      FALSE
+      PUSHNULL
+      $SendParameters$_constructor_to_value_bounce_body INLINECALLDICT
+      $global_send INLINECALLDICT
+    }>ELSE<{
+      DROP
+    }>
+    s6 s10 XCHG
+    s5 s9 XCHG
+    4 5 BLKSWAP
+  }>
+  $ShipAssembler$_internal_binary_ChangeHighload PROCINLINE:<{
+    s8 POP
+    46215 PUSHINT
+    __tact_context_get_sender INLINECALLDICT
+    s11 s(-1) PUXC
+    __tact_slice_eq_bits INLINECALLDICT
+    THROWANYIFNOT
+  }>
+  $ShipAssembler$_internal_binary_ChangeTreasury PROCINLINE:<{
+    s9 POP
+    46215 PUSHINT
+    __tact_context_get_sender INLINECALLDICT
+    s11 s(-1) PUXC
+    __tact_slice_eq_bits INLINECALLDICT
+    THROWANYIFNOT
+  }>
+  $ShipAssembler$_internal_binary_ChangeRoyaltyParams PROCINLINE:<{
+    3 3 BLKDROP2
+    46215 PUSHINT
+    __tact_context_get_sender INLINECALLDICT
+    s11 s(-1) PUXC
+    __tact_slice_eq_bits INLINECALLDICT
+    THROWANYIFNOT
+  }>
+  $ShipAssembler$_internal_binary_SetPause PROCINLINE:<{
+    s11 POP
+    46215 PUSHINT
+    __tact_context_get_sender INLINECALLDICT
+    s11 s(-1) PUXC
+    __tact_slice_eq_bits INLINECALLDICT
+    THROWANYIFNOT
+  }>
+  $ShipAssembler$_internal_binary_GetRoyaltyParams PROCINLINE:<{
+    __tact_context_get INLINECALLDICT
+    s2 s3 XCHG
+    3 BLKDROP
+    0 PUSHINT
+    64 PUSHINT
+    FALSE
+    s4 s7 s6 XCPU2
+    s7 PUSH
+    $ReportRoyaltyParams$_constructor_query_id_numerator_denominator_destination INLINECALLDICT
+    $ReportRoyaltyParams$_store_cell INLINECALLDICT
+    s3 s4 XCHG
+    s1 s3 s0 XCHG3
+    $SendParameters$_constructor_to_value_mode_bounce_body INLINECALLDICT
+    $global_send INLINECALLDICT
+  }>
+  %$ShipAssembler$_internal_empty PROCINLINE:<{
+  }>
+  $ShipAssembler$_internal_binary_Deploy PROCINLINE:<{
+    $DeployOk$_constructor_queryId INLINECALLDICT
+    $DeployOk$_store_cell INLINECALLDICT
+    $ShipAssembler$_fun_notify INLINECALLDICT
+  }>
+  %getNftItemInit PROC:<{
+    $ShipAssembler$_contract_load INLINECALLDICT
+    11 ROLL
+    $ShipAssembler$_fun_getNftItemInit INLINECALLDICT
+    11 2 BLKDROP2
+    $StateInit$_to_external INLINECALLDICT
+  }>
+  %getOwner PROC:<{
+    $ShipAssembler$_contract_load INLINECALLDICT
+    $ShipAssembler$_fun_getOwner INLINECALLDICT
+    11 1 BLKDROP2
+  }>
+  %get_nft_address_by_index PROC:<{
+    $ShipAssembler$_contract_load INLINECALLDICT
+    11 ROLL
+    $ShipAssembler$_fun_get_nft_address_by_index INLINECALLDICT
+    11 1 BLKDROP2
+  }>
+  %get_nft_content PROC:<{
+    $ShipAssembler$_contract_load INLINECALLDICT
+    2 11 BLKSWAP
+    $ShipAssembler$_fun_get_nft_content INLINECALLDICT
+    11 1 BLKDROP2
+  }>
+  %get_collection_data PROC:<{
+    $ShipAssembler$_contract_load INLINECALLDICT
+    $ShipAssembler$_fun_get_collection_data INLINECALLDICT
+    11 3 BLKDROP2
+    $CollectionData$_to_external INLINECALLDICT
+  }>
+  lazy_deployment_completed PROC:<{
+    c4 PUSH
+    CTOS
+    1 LDI
+    SWAP
+  }>
+  $ShipAssembler$_contract_router_internal PROCREF:<{
+    SWAP
+    IFJMP:<{
+      DROP
+      TRUE
+    }>
+    0 PUSHINT
+    OVER
+    SBITS
+    31 GTINT
+    IF:<{
+      DROP
+      DUP
+      32 PLDU
+    }>
+    DUP
+    1997904914 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      $AssembleShipMessage$_load INLINECALLDICT
+      1 8 BLKDROP2
+      $ShipAssembler$_internal_binary_AssembleShipMessage INLINECALLDICT
+      TRUE
+    }>
+    DUP
+    74989363 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      $UpgradeShip$_load INLINECALLDICT
+      1 10 BLKDROP2
+      $ShipAssembler$_internal_binary_UpgradeShip INLINECALLDICT
+      TRUE
+    }>
+    DUP
+    386813437 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      $MintNFT$_load INLINECALLDICT
+      NIP
+      $ShipAssembler$_internal_binary_MintNFT INLINECALLDICT
+      TRUE
+    }>
+    DUP
+    1766758178 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      $UpdatePublicKey$_load INLINECALLDICT
+      1 2 BLKDROP2
+      $ShipAssembler$_internal_binary_UpdatePublicKey INLINECALLDICT
+      TRUE
+    }>
+    DUP
+    2050115519 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      $WithdrawFunds$_load INLINECALLDICT
+      NIP
+      $ShipAssembler$_internal_binary_WithdrawFunds INLINECALLDICT
+      TRUE
+    }>
+    DUP
+    3576854235 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      $Excesses$_load INLINECALLDICT
+      NIP
+      $ShipAssembler$_internal_binary_Excesses INLINECALLDICT
+      TRUE
+    }>
+    DUP
+    2316713580 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      $ChangeHighload$_load INLINECALLDICT
+      NIP
+      $ShipAssembler$_internal_binary_ChangeHighload INLINECALLDICT
+      TRUE
+    }>
+    DUP
+    370798756 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      $ChangeTreasury$_load INLINECALLDICT
+      NIP
+      $ShipAssembler$_internal_binary_ChangeTreasury INLINECALLDICT
+      TRUE
+    }>
+    DUP
+    1209124053 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      $ChangeRoyaltyParams$_load INLINECALLDICT
+      1 3 BLKDROP2
+      $ShipAssembler$_internal_binary_ChangeRoyaltyParams INLINECALLDICT
+      TRUE
+    }>
+    DUP
+    163970072 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      $SetPause$_load INLINECALLDICT
+      NIP
+      $ShipAssembler$_internal_binary_SetPause INLINECALLDICT
+      TRUE
+    }>
+    DUP
+    1765620048 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      $GetRoyaltyParams$_load INLINECALLDICT
+      NIP
+      $ShipAssembler$_internal_binary_GetRoyaltyParams INLINECALLDICT
+      TRUE
+    }>
+    DUP
+    0 EQINT
+    s2 PUSH
+    SBITS
+    33 LESSINT
+    AND
+    IFJMP:<{
+      2DROP
+      %$ShipAssembler$_internal_empty INLINECALLDICT
+      TRUE
+    }>
+    2490013878 PUSHINT
+    EQUAL
+    IFJMP:<{
+      $Deploy$_load INLINECALLDICT
+      NIP
+      $ShipAssembler$_internal_binary_Deploy INLINECALLDICT
+      TRUE
+    }>
+    DROP
+    FALSE
+  }>
+  recv_internal PROC:<{
+    SWAP
+    CTOS
+    4 LDU
+    SWAP
+    1 PUSHINT
+    AND
+    NEGATE
+    SWAP
+    LDMSGADDR
+    SWAP
+    __tact_verify_address INLINECALLDICT
+    s0 s4 s2 PUXCPU
+    s0 s3 XCHG
+    4 TUPLE
+    __tact_context SETGLOB
+    s0 s2 XCHG
+    __tact_context_sender SETGLOB
+    $ShipAssembler$_contract_load INLINECALLDICT
+    2 11 BLKSWAP
+    $ShipAssembler$_contract_router_internal INLINECALLDICT
+    130 THROWIFNOT
+    $ShipAssembler$_contract_store INLINECALLDICT
+  }>
+}END>c

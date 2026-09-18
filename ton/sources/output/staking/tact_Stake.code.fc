@@ -1,0 +1,342 @@
+#pragma version =0.4.6;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+#include "tact_Stake.headers.fc";
+#include "tact_Stake.stdlib.fc";
+#include "tact_Stake.storage.fc";
+
+;;
+;; Contract Stake functions
+;;
+
+(int, int, slice, slice, slice, int, int, int, int, int, int, int, int) $Stake$_contract_init(int $id, slice $master_address, slice $owner_address, slice $fee_address, int $amount, int $out_amount, int $stake_time, int $mint_count, cell $metadata, int $max_claims) impure inline_ref {
+    var (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count)) = (null(), true, null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), 0);
+    $self'id = $id;
+    $self'fee_address = $fee_address;
+    $self'master_address = $master_address;
+    $self'owner_address = $owner_address;
+    $self'amount = $amount;
+    $self'out_amount = $out_amount;
+    $self'created_at = $global_now();
+    $self'stake_time = $stake_time;
+    $self'mint_count = $mint_count;
+    $self'max_claims = $max_claims;
+    $self'next_claim = ($self'created_at + $self'stake_time);
+    return ($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count);
+}
+
+((int, int, slice, slice, slice, int, int, int, int, int, int, int, int), int) $Stake$_fun_msgValue((int, int, slice, slice, slice, int, int, int, int, int, int, int, int) $self, int $value) impure inline_ref {
+    var (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count)) = $self;
+    int $tonBalanceBeforeMsg = ($global_myBalance() - $value);
+    int $storageFee = (20000000 - $global_min($tonBalanceBeforeMsg, 20000000));
+    var $fresh$ret_35 = ($value - ($storageFee + 20000000));
+    return (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count), $fresh$ret_35);
+}
+
+((int, int, slice, slice, slice, int, int, int, int, int, int, int, int), int) $Stake$_fun_getAmount((int, int, slice, slice, slice, int, int, int, int, int, int, int, int) $self) impure inline_ref {
+    var (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count)) = $self;
+    var $fresh$ret_36 = $self'amount;
+    return (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count), $fresh$ret_36);
+}
+
+((int, int, slice, slice, slice, int, int, int, int, int, int, int, int), int) $Stake$_fun_getOutAmount((int, int, slice, slice, slice, int, int, int, int, int, int, int, int) $self) impure inline_ref {
+    var (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count)) = $self;
+    var $fresh$ret_37 = $self'out_amount;
+    return (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count), $fresh$ret_37);
+}
+
+((int, int, slice, slice, slice, int, int, int, int, int, int, int, int), int) $Stake$_fun_getCreatedAt((int, int, slice, slice, slice, int, int, int, int, int, int, int, int) $self) impure inline_ref {
+    var (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count)) = $self;
+    var $fresh$ret_38 = $self'created_at;
+    return (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count), $fresh$ret_38);
+}
+
+((int, int, slice, slice, slice, int, int, int, int, int, int, int, int), int) $Stake$_fun_getStakeTime((int, int, slice, slice, slice, int, int, int, int, int, int, int, int) $self) impure inline_ref {
+    var (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count)) = $self;
+    var $fresh$ret_39 = $self'stake_time;
+    return (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count), $fresh$ret_39);
+}
+
+((int, int, slice, slice, slice, int, int, int, int, int, int, int, int), int) $Stake$_fun_getNextClaim((int, int, slice, slice, slice, int, int, int, int, int, int, int, int) $self) impure inline_ref {
+    var (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count)) = $self;
+    var $fresh$ret_40 = $self'next_claim;
+    return (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count), $fresh$ret_40);
+}
+
+((int, int, slice, slice, slice, int, int, int, int, int, int, int, int), int) $Stake$_fun_getMintCount((int, int, slice, slice, slice, int, int, int, int, int, int, int, int) $self) impure inline_ref {
+    var (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count)) = $self;
+    var $fresh$ret_41 = $self'mint_count;
+    return (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count), $fresh$ret_41);
+}
+
+((int, int, slice, slice, slice, int, int, int, int, int, int, int, int), slice) $Stake$_fun_getMasterAddress((int, int, slice, slice, slice, int, int, int, int, int, int, int, int) $self) impure inline_ref {
+    var (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count)) = $self;
+    var $fresh$ret_42 = $self'master_address;
+    return (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count), $fresh$ret_42);
+}
+
+((int, int, slice, slice, slice, int, int, int, int, int, int, int, int), slice) $Stake$_fun_getOwnerAddress((int, int, slice, slice, slice, int, int, int, int, int, int, int, int) $self) impure inline_ref {
+    var (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count)) = $self;
+    var $fresh$ret_43 = $self'owner_address;
+    return (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count), $fresh$ret_43);
+}
+
+((int, int, slice, slice, slice, int, int, int, int, int, int, int, int), int) $Stake$_fun_getMaxClaims((int, int, slice, slice, slice, int, int, int, int, int, int, int, int) $self) impure inline_ref {
+    var (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count)) = $self;
+    var $fresh$ret_44 = $self'max_claims;
+    return (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count), $fresh$ret_44);
+}
+
+((int, int, slice, slice, slice, int, int, int, int, int, int, int, int), int) $Stake$_fun_getClaimsCount((int, int, slice, slice, slice, int, int, int, int, int, int, int, int) $self) impure inline_ref {
+    var (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count)) = $self;
+    var $fresh$ret_45 = $self'claims_count;
+    return (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count), $fresh$ret_45);
+}
+
+((int, int, slice, slice, slice, int, int, int, int, int, int, int, int), int) $Stake$_fun_getRequiredValue((int, int, slice, slice, slice, int, int, int, int, int, int, int, int) $self) impure inline_ref {
+    var (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count)) = $self;
+    var $fresh$ret_46 = (((($self'mint_count * 12500000) + 20000000) + 20000000) + 50000000);
+    return (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count), $fresh$ret_46);
+}
+
+((int, int, slice, slice, slice, int, int, int, int, int, int, int, int), int) $Stake$_fun_getId((int, int, slice, slice, slice, int, int, int, int, int, int, int, int) $self) impure inline_ref {
+    var (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count)) = $self;
+    var $fresh$ret_47 = $self'id;
+    return (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count), $fresh$ret_47);
+}
+
+;;
+;; Receivers of a Contract Stake
+;;
+
+(((int, int, slice, slice, slice, int, int, int, int, int, int, int, int)), ()) $Stake$_internal_binary_Claim((int, int, slice, slice, slice, int, int, int, int, int, int, int, int) $self, (int, slice, slice, slice) $msg) impure inline {
+    var ($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count) = $self;
+    var ($msg'query_id, $msg'owner_address, $msg'wallet_address, $msg'signature) = $msg;
+    throw_unless(56818, $self'is_active);
+    throw_unless(30318, ( (( __tact_slice_eq_bits($self'master_address, __tact_context_get_sender()) )) ? (true) : (( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) )) ));
+    throw_unless(63694, ($self'next_claim < $global_now()));
+    throw_unless(45220, ($self'claims_count < $self'max_claims));
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    int $msgValue = $ctx'value;
+    int $requiredForMint = (((($self'mint_count * 12500000) + 20000000) + 20000000) + 50000000);
+    throw_unless(22565, ($msgValue >= $requiredForMint));
+    int $fees = ($msgValue - $requiredForMint);
+    if (($fees < 0)) {
+        $fees = 0;
+    }
+    $global_send($SendParameters$_constructor_to_value_mode_bounce_body($self'master_address, ($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count)~$Stake$_fun_msgValue($msgValue), 1, false, $DoMint$_store_cell($DoMint$_constructor_query_id_amount_mint_count_receiver_sender_signature_wallet_address_fees($msg'query_id, $self'out_amount, $self'mint_count, $self'owner_address, $global_myAddress(), $msg'signature, $msg'wallet_address, $fees))));
+    $self'claims_count = ($self'claims_count + 1);
+    $self'next_claim = ($self'next_claim + $self'stake_time);
+    return (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count), ());
+}
+
+(((int, int, slice, slice, slice, int, int, int, int, int, int, int, int)), ()) $Stake$_internal_binary_Restake((int, int, slice, slice, slice, int, int, int, int, int, int, int, int) $self, (int) $msg) impure inline {
+    var ($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count) = $self;
+    var ($msg'query_id) = $msg;
+    throw_unless(56818, $self'is_active);
+    throw_unless(20993, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    throw_unless(14562, ($self'claims_count >= $self'max_claims));
+    $self'claims_count = 0;
+    $self'next_claim = ($global_now() + $self'stake_time);
+    return (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count), ());
+}
+
+(((int, int, slice, slice, slice, int, int, int, int, int, int, int, int)), ()) $Stake$_internal_binary_Withdraw((int, int, slice, slice, slice, int, int, int, int, int, int, int, int) $self, (int, slice, slice) $msg) impure inline {
+    var ($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count) = $self;
+    var ($msg'query_id, $msg'signature, $msg'wallet_address) = $msg;
+    throw_unless(56818, $self'is_active);
+    throw_unless(26825, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    throw_unless(14562, ($self'claims_count >= $self'max_claims));
+    $self'is_active = false;
+    $global_send($SendParameters$_constructor_to_value_mode_bounce_body($self'master_address, 40000000, 2, false, $DoMint$_store_cell($DoMint$_constructor_query_id_amount_mint_count_receiver_sender_signature_wallet_address_fees($msg'query_id, $self'amount, 0, $self'owner_address, $global_myAddress(), $msg'signature, $msg'wallet_address, 0))));
+    $global_send($SendParameters$_constructor_to_value_mode_bounce_body($self'fee_address, 0, 160, false, $Released$_store_cell($Released$_constructor_query_id($msg'query_id))));
+    return (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count), ());
+}
+
+(((int, int, slice, slice, slice, int, int, int, int, int, int, int, int)), ()) $Stake$_internal_binary_TransferTON((int, int, slice, slice, slice, int, int, int, int, int, int, int, int) $self, (slice, int) $msg) impure inline {
+    var ($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count) = $self;
+    var ($msg'to_address, $msg'value) = $msg;
+    throw_unless(26825, ( __tact_slice_eq_bits($self'master_address, __tact_context_get_sender()) ));
+    $global_send($SendParameters$_constructor_to_value_mode_bounce($msg'to_address, $msg'value, 64, false));
+    return (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count), ());
+}
+
+(((int, int, slice, slice, slice, int, int, int, int, int, int, int, int)), ()) $Stake$_internal_binary_ProxyMsg((int, int, slice, slice, slice, int, int, int, int, int, int, int, int) $self, (int, slice, int, cell) $msg) impure inline {
+    var ($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count) = $self;
+    var ($msg'query_id, $msg'to, $msg'value, $msg'body) = $msg;
+    throw_unless(53618, ( __tact_slice_eq_bits($self'master_address, __tact_context_get_sender()) ));
+    $global_send($SendParameters$_constructor_to_mode_value_body_bounce($msg'to, 64, $msg'value, $msg'body, false));
+    return (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count), ());
+}
+
+(((int, int, slice, slice, slice, int, int, int, int, int, int, int, int)), ()) %$Stake$_internal_empty((int, int, slice, slice, slice, int, int, int, int, int, int, int, int) $self) impure inline {
+    var ($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count) = $self;
+    throw_unless(48007, ( __tact_slice_eq_bits($self'master_address, __tact_context_get_sender()) ));
+    throw_unless(56818, $self'is_active);
+    return (($self'id, $self'is_active, $self'master_address, $self'owner_address, $self'fee_address, $self'amount, $self'out_amount, $self'created_at, $self'stake_time, $self'next_claim, $self'mint_count, $self'max_claims, $self'claims_count), ());
+}
+
+;;
+;; Get methods of a Contract Stake
+;;
+
+_ %getAmount() method_id(95947) {
+    var self = $Stake$_contract_load();
+    var res = self~$Stake$_fun_getAmount();
+    return res;
+}
+
+_ %getOutAmount() method_id(93122) {
+    var self = $Stake$_contract_load();
+    var res = self~$Stake$_fun_getOutAmount();
+    return res;
+}
+
+_ %getCreatedAt() method_id(67038) {
+    var self = $Stake$_contract_load();
+    var res = self~$Stake$_fun_getCreatedAt();
+    return res;
+}
+
+_ %getStakeTime() method_id(91827) {
+    var self = $Stake$_contract_load();
+    var res = self~$Stake$_fun_getStakeTime();
+    return res;
+}
+
+_ %getNextClaim() method_id(88671) {
+    var self = $Stake$_contract_load();
+    var res = self~$Stake$_fun_getNextClaim();
+    return res;
+}
+
+_ %getMintCount() method_id(126466) {
+    var self = $Stake$_contract_load();
+    var res = self~$Stake$_fun_getMintCount();
+    return res;
+}
+
+_ %getMasterAddress() method_id(93450) {
+    var self = $Stake$_contract_load();
+    var res = self~$Stake$_fun_getMasterAddress();
+    return res;
+}
+
+_ %getOwnerAddress() method_id(91429) {
+    var self = $Stake$_contract_load();
+    var res = self~$Stake$_fun_getOwnerAddress();
+    return res;
+}
+
+_ %getMaxClaims() method_id(89578) {
+    var self = $Stake$_contract_load();
+    var res = self~$Stake$_fun_getMaxClaims();
+    return res;
+}
+
+_ %getClaimsCount() method_id(109233) {
+    var self = $Stake$_contract_load();
+    var res = self~$Stake$_fun_getClaimsCount();
+    return res;
+}
+
+_ %getRequiredValue() method_id(126008) {
+    var self = $Stake$_contract_load();
+    var res = self~$Stake$_fun_getRequiredValue();
+    return res;
+}
+
+_ %getId() method_id(66593) {
+    var self = $Stake$_contract_load();
+    var res = self~$Stake$_fun_getId();
+    return res;
+}
+
+_ lazy_deployment_completed() method_id {
+    return get_data().begin_parse().load_int(1);
+}
+
+;;
+;; Routing of a Contract Stake
+;;
+
+((int, int, slice, slice, slice, int, int, int, int, int, int, int, int), int) $Stake$_contract_router_internal((int, int, slice, slice, slice, int, int, int, int, int, int, int, int) self, int msg_bounced, slice in_msg) impure inline_ref {
+    ;; Handle bounced messages
+    if (msg_bounced) {
+        return (self, true);
+    }
+    
+    ;; Parse incoming message
+    int op = 0;
+    if (slice_bits(in_msg) >= 32) {
+        op = in_msg.preload_uint(32);
+    }
+    
+    
+    ;; Receive Claim message
+    if (op == 1586636328) {
+        var msg = in_msg~$Claim$_load();
+        self~$Stake$_internal_binary_Claim(msg);
+        return (self, true);
+    }
+    
+    ;; Receive Restake message
+    if (op == 1489790520) {
+        var msg = in_msg~$Restake$_load();
+        self~$Stake$_internal_binary_Restake(msg);
+        return (self, true);
+    }
+    
+    ;; Receive Withdraw message
+    if (op == 3123246349) {
+        var msg = in_msg~$Withdraw$_load();
+        self~$Stake$_internal_binary_Withdraw(msg);
+        return (self, true);
+    }
+    
+    ;; Receive TransferTON message
+    if (op == 271167746) {
+        var msg = in_msg~$TransferTON$_load();
+        self~$Stake$_internal_binary_TransferTON(msg);
+        return (self, true);
+    }
+    
+    ;; Receive ProxyMsg message
+    if (op == 3891826139) {
+        var msg = in_msg~$ProxyMsg$_load();
+        self~$Stake$_internal_binary_ProxyMsg(msg);
+        return (self, true);
+    }
+    
+    ;; Receive empty message
+    if ((op == 0) & (slice_bits(in_msg) <= 32)) {
+        self~%$Stake$_internal_empty();
+        return (self, true);
+    }
+    
+    return (self, false);
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    var msg_flags = cs~load_uint(4);
+    var msg_bounced = -(msg_flags & 1);
+    slice msg_sender_addr = __tact_verify_address(cs~load_msg_addr());
+    __tact_context = (msg_bounced, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var self = $Stake$_contract_load();
+    
+    ;; Handle operation
+    int handled = self~$Stake$_contract_router_internal(msg_bounced, in_msg);
+    
+    ;; Throw if not handled
+    throw_unless(130, handled);
+    
+    ;; Persist state
+    $Stake$_contract_store(self);
+}

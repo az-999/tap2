@@ -1,0 +1,285 @@
+#pragma version =0.4.4;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+#include "tact_Qwe.headers.fc";
+#include "tact_Qwe.stdlib.fc";
+#include "tact_Qwe.storage.fc";
+
+;;
+;; Contract Qwe functions
+;;
+
+(slice, slice, int, cell, cell) $Qwe$_contract_init(slice $owner_address, slice $collection_address, int $owner_public_key, cell $collection_metadata, cell $nft_item_metadata) impure inline_ref {
+    var (($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)) = (null(), null(), null(), null(), null());
+    $self'owner_address = $owner_address;
+    $self'collection_address = $collection_address;
+    $self'owner_public_key = $owner_public_key;
+    $self'collection_metadata = $collection_metadata;
+    $self'nft_item_metadata = $nft_item_metadata;
+    return ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata);
+}
+
+((slice, slice, int, cell, cell), int) $Qwe$_fun_verifySignature((slice, slice, int, cell, cell) $self, int $ship_level, slice $signature) impure inline_ref {
+    var (($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)) = $self;
+    int $hash = cell_hash(end_cell(store_uint(begin_cell(), $ship_level, 256)));
+    return (($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata), check_signature($hash, $signature, $self'owner_public_key));
+}
+
+((slice, slice, int, cell, cell), ()) $Qwe$_fun_burnNFT((slice, slice, int, cell, cell) $self, slice $nft_contract) impure inline_ref {
+    var (($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)) = $self;
+    $global_send($SendParameters$_constructor_to_value_bounce_body($nft_contract, 50000000, true, $BurnNFT$_store_cell($BurnNFT$_constructor_())));
+    return (($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata), ());
+}
+
+((slice, slice, int, cell, cell), (cell, cell)) $Qwe$_fun_getNewNftItemInit((slice, slice, int, cell, cell) $self, int $item_index) impure inline_ref {
+    var (($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)) = $self;
+    slice $contract_address = my_address();
+    cell $ship_content = end_cell(begin_cell());
+    return (($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata), $ShipNFT$_init_child(__tact_context_sys, $contract_address, $item_index, my_address(), $ship_content));
+}
+
+((slice, slice, int, cell, cell), ()) $Qwe$_fun_mintShip((slice, slice, int, cell, cell) $self, slice $sender, int $msgValue, cell $content, int $ship_level) impure inline_ref {
+    var (($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)) = $self;
+    var ($nft_init'code, $nft_init'data) = ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)~$Qwe$_fun_getNewNftItemInit($ship_level);
+    $global_send($SendParameters$_constructor_to_value_bounce_body_code_data($global_contractAddress(($nft_init'code, $nft_init'data)), 100000000, false, $Transfer$_store_cell($Transfer$_constructor_new_owner_forward_amount_query_id($sender, 50000000, 1)), $nft_init'code, $nft_init'data));
+    return (($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata), ());
+}
+
+((slice, slice, int, cell, cell), slice) $Qwe$_fun_getOwner((slice, slice, int, cell, cell) $self) impure inline_ref {
+    var (($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)) = $self;
+    return (($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata), $self'owner_address);
+}
+
+;;
+;; Receivers of a Contract Qwe
+;;
+
+(((slice, slice, int, cell, cell)), ()) $Qwe$_internal_binary_AssembleShipMessage((slice, slice, int, cell, cell) $self, (slice, slice, slice, slice, slice, slice, int, slice) $msg) impure inline {
+    var ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata) = $self;
+    var ($msg'nft_contract_1, $msg'nft_contract_2, $msg'nft_contract_3, $msg'nft_contract_4, $msg'nft_contract_5, $msg'nft_contract_6, $msg'ship_level, $msg'signature) = $msg;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    int $msgValue = $ctx'value;
+    slice $user = __tact_context_get_sender();
+    int $signature_valid = ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)~$Qwe$_fun_verifySignature($msg'ship_level, $msg'signature);
+    throw_unless(48401, $signature_valid);
+    ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)~$Qwe$_fun_burnNFT($msg'nft_contract_1);
+    ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)~$Qwe$_fun_burnNFT($msg'nft_contract_2);
+    ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)~$Qwe$_fun_burnNFT($msg'nft_contract_3);
+    ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)~$Qwe$_fun_burnNFT($msg'nft_contract_4);
+    ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)~$Qwe$_fun_burnNFT($msg'nft_contract_5);
+    ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)~$Qwe$_fun_burnNFT($msg'nft_contract_6);
+    cell $ship_content = $self'collection_metadata;
+    ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)~$Qwe$_fun_mintShip($user, $msgValue, $ship_content, $msg'ship_level);
+    return (($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata), ());
+}
+
+(((slice, slice, int, cell, cell)), ()) $Qwe$_internal_binary_UpgradeShip((slice, slice, int, cell, cell) $self, (slice, slice, slice, slice, slice, slice, slice, int, slice) $msg) impure inline {
+    var ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata) = $self;
+    var ($msg'nft_contract_1, $msg'nft_contract_2, $msg'nft_contract_3, $msg'nft_contract_4, $msg'nft_contract_5, $msg'nft_contract_6, $msg'nft_contract_7, $msg'ship_level, $msg'signature) = $msg;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    int $msgValue = $ctx'value;
+    slice $user = __tact_context_get_sender();
+    int $signature_valid = ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)~$Qwe$_fun_verifySignature($msg'ship_level, $msg'signature);
+    throw_unless(48401, $signature_valid);
+    ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)~$Qwe$_fun_burnNFT($msg'nft_contract_1);
+    ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)~$Qwe$_fun_burnNFT($msg'nft_contract_2);
+    ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)~$Qwe$_fun_burnNFT($msg'nft_contract_3);
+    ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)~$Qwe$_fun_burnNFT($msg'nft_contract_4);
+    ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)~$Qwe$_fun_burnNFT($msg'nft_contract_5);
+    ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)~$Qwe$_fun_burnNFT($msg'nft_contract_6);
+    ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)~$Qwe$_fun_burnNFT($msg'nft_contract_7);
+    cell $ship_content = $self'collection_metadata;
+    ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)~$Qwe$_fun_mintShip($user, $msgValue, $ship_content, $msg'ship_level);
+    return (($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata), ());
+}
+
+(((slice, slice, int, cell, cell)), ()) $Qwe$_internal_binary_MintNFT((slice, slice, int, cell, cell) $self, (int) $msg) impure inline {
+    var ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata) = $self;
+    var ($msg'ship_level) = $msg;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    int $msgValue = $ctx'value;
+    throw_unless(53983, ($msgValue >= 50000000));
+    int $tonBalanceBeforeMsg = (__tact_my_balance() - $msgValue);
+    int $storageFee = (20000000 - min($tonBalanceBeforeMsg, 20000000));
+    $msgValue = ($msgValue - ($storageFee + 20000000));
+    cell $ship_content = $self'collection_metadata;
+    ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)~$Qwe$_fun_mintShip(__tact_context_get_sender(), $msgValue, $ship_content, $msg'ship_level);
+    return (($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata), ());
+}
+
+(((slice, slice, int, cell, cell)), ()) $Qwe$_internal_binary_VerifySingle((slice, slice, int, cell, cell) $self, (int, slice) $msg) impure inline {
+    var ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata) = $self;
+    var ($msg'ship_level, $msg'signature) = $msg;
+    int $verified = ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)~$Qwe$_fun_verifySignature($msg'ship_level, $msg'signature);
+    throw_unless(48401, $verified);
+    return (($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata), ());
+}
+
+(((slice, slice, int, cell, cell)), ()) $Qwe$_internal_binary_BurnSingle((slice, slice, int, cell, cell) $self, (slice) $msg) impure inline {
+    var ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata) = $self;
+    var ($msg'nft_contract) = $msg;
+    ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)~$Qwe$_fun_burnNFT($msg'nft_contract);
+    return (($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata), ());
+}
+
+(((slice, slice, int, cell, cell)), ()) $Qwe$_internal_binary_UpdatePublicKey((slice, slice, int, cell, cell) $self, (int, int) $msg) impure inline {
+    var ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata) = $self;
+    var ($msg'query_id, $msg'new_public_key) = $msg;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    slice $user = __tact_context_get_sender();
+    throw_unless(47429, ( __tact_slice_eq_bits($self'owner_address, $user) ));
+    $self'owner_public_key = $msg'new_public_key;
+    return (($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata), ());
+}
+
+(((slice, slice, int, cell, cell)), ()) $Qwe$_internal_binary_WithdrawFunds((slice, slice, int, cell, cell) $self, (int) $msg) impure inline {
+    var ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata) = $self;
+    var ($msg'query_id) = $msg;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    slice $user = __tact_context_get_sender();
+    throw_unless(63433, ( __tact_slice_eq_bits($self'owner_address, $user) ));
+    int $currentBalance = __tact_my_balance();
+    int $availableBalance = ($currentBalance - 40000000);
+    throw_unless(58821, ($availableBalance > 0));
+    $global_send($SendParameters$_constructor_to_value_bounce_body($self'owner_address, $availableBalance, false, $WithdrawalConfirmation$_store_cell($WithdrawalConfirmation$_constructor_query_id_amount($msg'query_id, $availableBalance))));
+    return (($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata), ());
+}
+
+(((slice, slice, int, cell, cell)), ()) %$Qwe$_internal_empty((slice, slice, int, cell, cell) $self) impure inline {
+    var ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata) = $self;
+    return (($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata), ());
+}
+
+(((slice, slice, int, cell, cell)), ()) $Qwe$_internal_binary_Deploy((slice, slice, int, cell, cell) $self, (int) $deploy) impure inline {
+    var ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata) = $self;
+    var ($deploy'queryId) = $deploy;
+    ($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata)~$Qwe$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId)));
+    return (($self'owner_address, $self'collection_address, $self'owner_public_key, $self'collection_metadata, $self'nft_item_metadata), ());
+}
+
+;;
+;; Get methods of a Contract Qwe
+;;
+
+_ %getNewNftItemInit(int $item_index) method_id(98987) {
+    int $item_index = $item_index;
+    var self = $Qwe$_contract_load();
+    var res = self~$Qwe$_fun_getNewNftItemInit($item_index);
+    return $StateInit$_to_external(res);
+}
+
+_ %getOwner() method_id(102025) {
+    var self = $Qwe$_contract_load();
+    var res = self~$Qwe$_fun_getOwner();
+    return res;
+}
+
+_ lazy_deployment_completed() method_id {
+    return get_data().begin_parse().load_int(1);
+}
+
+;;
+;; Routing of a Contract Qwe
+;;
+
+((slice, slice, int, cell, cell), int) $Qwe$_contract_router_internal((slice, slice, int, cell, cell) self, int msg_bounced, slice in_msg) impure inline_ref {
+    ;; Handle bounced messages
+    if (msg_bounced) {
+        return (self, true);
+    }
+    
+    ;; Parse incoming message
+    int op = 0;
+    if (slice_bits(in_msg) >= 32) {
+        op = in_msg.preload_uint(32);
+    }
+    
+    
+    ;; Receive AssembleShipMessage message
+    if (op == 1997904914) {
+        var msg = in_msg~$AssembleShipMessage$_load();
+        self~$Qwe$_internal_binary_AssembleShipMessage(msg);
+        return (self, true);
+    }
+    
+    ;; Receive UpgradeShip message
+    if (op == 719310013) {
+        var msg = in_msg~$UpgradeShip$_load();
+        self~$Qwe$_internal_binary_UpgradeShip(msg);
+        return (self, true);
+    }
+    
+    ;; Receive MintNFT message
+    if (op == 386813437) {
+        var msg = in_msg~$MintNFT$_load();
+        self~$Qwe$_internal_binary_MintNFT(msg);
+        return (self, true);
+    }
+    
+    ;; Receive VerifySingle message
+    if (op == 1607862665) {
+        var msg = in_msg~$VerifySingle$_load();
+        self~$Qwe$_internal_binary_VerifySingle(msg);
+        return (self, true);
+    }
+    
+    ;; Receive BurnSingle message
+    if (op == 3118058887) {
+        var msg = in_msg~$BurnSingle$_load();
+        self~$Qwe$_internal_binary_BurnSingle(msg);
+        return (self, true);
+    }
+    
+    ;; Receive UpdatePublicKey message
+    if (op == 1766758178) {
+        var msg = in_msg~$UpdatePublicKey$_load();
+        self~$Qwe$_internal_binary_UpdatePublicKey(msg);
+        return (self, true);
+    }
+    
+    ;; Receive WithdrawFunds message
+    if (op == 2050115519) {
+        var msg = in_msg~$WithdrawFunds$_load();
+        self~$Qwe$_internal_binary_WithdrawFunds(msg);
+        return (self, true);
+    }
+    
+    ;; Receive empty message
+    if ((op == 0) & (slice_bits(in_msg) <= 32)) {
+        self~%$Qwe$_internal_empty();
+        return (self, true);
+    }
+    
+    ;; Receive Deploy message
+    if (op == 2490013878) {
+        var msg = in_msg~$Deploy$_load();
+        self~$Qwe$_internal_binary_Deploy(msg);
+        return (self, true);
+    }
+    
+    return (self, false);
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    var msg_flags = cs~load_uint(4);
+    var msg_bounced = -(msg_flags & 1);
+    slice msg_sender_addr = __tact_verify_address(cs~load_msg_addr());
+    __tact_context = (msg_bounced, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var self = $Qwe$_contract_load();
+    
+    ;; Handle operation
+    int handled = self~$Qwe$_contract_router_internal(msg_bounced, in_msg);
+    
+    ;; Throw if not handled
+    throw_unless(130, handled);
+    
+    ;; Persist state
+    $Qwe$_contract_store(self);
+}

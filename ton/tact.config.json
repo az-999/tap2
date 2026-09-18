@@ -1,0 +1,11 @@
+{
+    "projects": [{
+        "name": "tact",
+        "path": "./sources/staking/contracts/stake_master.tact",
+        "output": "./sources/output/staking",
+        "options": {
+            "external": true,  
+            "debug": true   
+        }
+    }]
+}

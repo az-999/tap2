@@ -1,0 +1,120 @@
+@startuml
+!define FONT_MAIN Helvetica
+!define COLOR_BG #FFFFFF
+!define COLOR_BORDER #2C3E50
+!define COLOR_BOX #3498DB
+!define COLOR_ACTOR #E74C3C
+!define COLOR_NOTE #F1C40F
+!define COLOR_LIFELINE #BDC3C7
+
+skinparam backgroundColor COLOR_BG
+skinparam defaultFontName FONT_MAIN
+skinparam defaultFontSize 12
+
+skinparam sequence {
+    ArrowColor COLOR_BORDER
+    ActorBorderColor COLOR_ACTOR
+    ActorBackgroundColor #FADBD8
+    ParticipantBorderColor COLOR_BOX
+    ParticipantBackgroundColor #EBF5FB
+    LifeLineBorderColor COLOR_LIFELINE
+    LifeLineBackgroundColor COLOR_BG
+    BoxBorderColor COLOR_BORDER
+    BoxBackgroundColor #ECF0F1
+    NoteBorderColor #D4AC0D
+    NoteBackgroundColor #FCF3CF
+    GroupBorderColor COLOR_BORDER
+    GroupBackgroundColor #ECF0F1
+}
+
+skinparam BoxPadding 10
+skinparam ParticipantPadding 20
+
+title <b>Обновленная схема работы системы стейкинга</b>\n
+
+box "Клиентская часть" #E8F6F3
+participant "Пользователь" as User #FFFFFF
+participant "Фронтенд" as FE
+end box
+
+box "Серверная часть" #EBF5FB
+participant "Бэкенд" as BE
+participant "StakeMaster" as Master
+participant "NFT Контракт" as NFT
+end box
+
+== Инициализация ==
+note over Master, NFT #FCF3CF
+  <b>Последовательность действий:</b>
+  1. Деплой StakeMaster контракта
+  2. Установка StakeMaster как minter в NFT контракте
+  3. Импорт данных о старых стейках в StakeMaster через AddOldStakeRecord
+end note
+
+== Процесс нового стейка ==
+User -> FE ++: Нажатие "Стейк"
+FE -> BE ++: Запрос на стейк
+BE -> Master ++: Deposit
+Master -> NFT ++: Минт NFT
+return NFT создан
+return Стейк создан
+return Успех
+return Показать успех
+
+== Процесс клейма старого стейка ==
+User -> FE ++: Нажатие "Клейм"\n(старый стейк)
+FE -> BE ++: Запрос на клейм
+BE -> Master ++: ClaimOldStake
+Master -> User: Отправка реварда
+Master -> NFT ++: Минт NFT
+return NFT создан
+return Клейм обработан
+return Успех
+return Показать успех
+
+== Процесс клейма нового стейка ==
+User -> FE ++: Нажатие "Клейм"\n(новый стейк)
+FE -> BE ++: Запрос на клейм
+BE -> Master ++: Claim
+Master -> User: Отправка реварда
+Master -> NFT ++: Минт NFT
+return NFT создан
+return Клейм обработан
+return Успех
+return Показать успех
+
+== Процесс рестейка ==
+User -> FE ++: Нажатие "Рестейк"
+FE -> BE ++: Запрос на рестейк
+alt Старый стейк
+BE -> Master ++: RestakeOldStake
+return Рестейк обработан
+else Новый стейк
+BE -> Master ++: Restake
+return Рестейк обработан
+end
+return Успех
+return Показать успех
+
+== Процесс вывода ==
+User -> FE ++: Нажатие "Вывод"
+FE -> BE ++: Запрос на вывод
+alt Старый стейк
+BE -> Master ++: WithdrawOldStake
+Master -> User: Отправка токенов
+return Вывод обработан
+else Новый стейк
+BE -> Master ++: Withdraw
+Master -> User: Отправка токенов
+return Вывод обработан
+end
+return Успех
+return Показать успех
+
+legend right
+  |<back:#E8F8F5>    </back>| <b>Компонент</b> |<b>Назначение</b> |
+  |<back:#EBF5FB>    </back>| StakeMaster | Единый контракт для старых и новых стейков |
+  |<back:#EBF5FB>    </back>| NFT Контракт | Минт NFT |
+endlegend
+
+@enduml

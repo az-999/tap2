@@ -1,0 +1,220 @@
+;;
+;; Type: SendParameters
+;; TLB: _ bounce:bool to:address value:int257 mode:int257 body:Maybe ^cell code:Maybe ^cell data:Maybe ^cell = SendParameters
+;;
+
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_value_mode_bounce_body(slice $to, int $value, int $mode, int $bounce, cell $body) inline {
+    return ($bounce, $to, $value, $mode, $body, null(), null());
+}
+
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_value_mode_bounce(slice $to, int $value, int $mode, int $bounce) inline {
+    return ($bounce, $to, $value, $mode, null(), null(), null());
+}
+
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_mode_value_body_bounce(slice $to, int $mode, int $value, cell $body, int $bounce) inline {
+    return ($bounce, $to, $value, $mode, $body, null(), null());
+}
+
+;;
+;; Type: TransferTON
+;; Header: 0x1029b102
+;; TLB: transfer_ton#1029b102 to_address:address value:coins = TransferTON
+;;
+
+(slice, ((slice, int))) $TransferTON$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 271167746);
+    var v'to_address = sc_0~__tact_load_address();
+    var v'value = sc_0~load_coins();
+    return (sc_0, (v'to_address, v'value));
+}
+
+;;
+;; Type: Claim
+;; Header: 0x5e922628
+;; TLB: claim#5e922628 query_id:uint64 owner_address:address wallet_address:address signature:^slice = Claim
+;;
+
+(slice, ((int, slice, slice, slice))) $Claim$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 1586636328);
+    var v'query_id = sc_0~load_uint(64);
+    var v'owner_address = sc_0~__tact_load_address();
+    var v'wallet_address = sc_0~__tact_load_address();
+    var v'signature = sc_0~load_ref().begin_parse();
+    return (sc_0, (v'query_id, v'owner_address, v'wallet_address, v'signature));
+}
+
+;;
+;; Type: Released
+;; Header: 0xcebf59cb
+;; TLB: released#cebf59cb query_id:uint64 = Released
+;;
+
+builder $Released$_store(builder build_0, (int) v) inline {
+    var (v'query_id) = v;
+    build_0 = store_uint(build_0, 3468646859, 32);
+    build_0 = build_0.store_uint(v'query_id, 64);
+    return build_0;
+}
+
+cell $Released$_store_cell((int) v) inline {
+    return $Released$_store(begin_cell(), v).end_cell();
+}
+
+((int)) $Released$_constructor_query_id(int $query_id) inline {
+    return ($query_id);
+}
+
+;;
+;; Type: ProxyMsg
+;; Header: 0xe7f88ddb
+;; TLB: proxy_msg#e7f88ddb query_id:uint64 to:address value:coins body:Maybe ^cell = ProxyMsg
+;;
+
+(slice, ((int, slice, int, cell))) $ProxyMsg$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 3891826139);
+    var v'query_id = sc_0~load_uint(64);
+    var v'to = sc_0~__tact_load_address();
+    var v'value = sc_0~load_coins();
+    var v'body = sc_0~load_int(1) ? sc_0~load_ref() : null();
+    return (sc_0, (v'query_id, v'to, v'value, v'body));
+}
+
+;;
+;; Type: DoMint
+;; Header: 0xa67ba7f7
+;; TLB: do_mint#a67ba7f7 query_id:uint64 receiver:address sender:address signature:^slice mint_count:uint32 amount:coins wallet_address:address fees:coins = DoMint
+;;
+
+builder $DoMint$_store(builder build_0, (int, slice, slice, slice, int, int, slice, int) v) inline_ref {
+    var (v'query_id, v'receiver, v'sender, v'signature, v'mint_count, v'amount, v'wallet_address, v'fees) = v;
+    build_0 = store_uint(build_0, 2793121783, 32);
+    build_0 = build_0.store_uint(v'query_id, 64);
+    build_0 = __tact_store_address(build_0, v'receiver);
+    build_0 = __tact_store_address(build_0, v'sender);
+    build_0 = build_0.store_ref(begin_cell().store_slice(v'signature).end_cell());
+    build_0 = build_0.store_uint(v'mint_count, 32);
+    build_0 = build_0.store_coins(v'amount);
+    var build_1 = begin_cell();
+    build_1 = __tact_store_address(build_1, v'wallet_address);
+    build_1 = build_1.store_coins(v'fees);
+    build_0 = store_ref(build_0, build_1.end_cell());
+    return build_0;
+}
+
+cell $DoMint$_store_cell((int, slice, slice, slice, int, int, slice, int) v) inline {
+    return $DoMint$_store(begin_cell(), v).end_cell();
+}
+
+((int, slice, slice, slice, int, int, slice, int)) $DoMint$_constructor_query_id_amount_mint_count_receiver_sender_signature_wallet_address_fees(int $query_id, int $amount, int $mint_count, slice $receiver, slice $sender, slice $signature, slice $wallet_address, int $fees) inline {
+    return ($query_id, $receiver, $sender, $signature, $mint_count, $amount, $wallet_address, $fees);
+}
+
+;;
+;; Type: Restake
+;; Header: 0x58cc6638
+;; TLB: restake#58cc6638 query_id:uint64 = Restake
+;;
+
+(slice, ((int))) $Restake$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 1489790520);
+    var v'query_id = sc_0~load_uint(64);
+    return (sc_0, (v'query_id));
+}
+
+;;
+;; Type: Withdraw
+;; Header: 0xba28f50d
+;; TLB: withdraw#ba28f50d query_id:uint64 signature:^slice wallet_address:address = Withdraw
+;;
+
+(slice, ((int, slice, slice))) $Withdraw$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 3123246349);
+    var v'query_id = sc_0~load_uint(64);
+    var v'signature = sc_0~load_ref().begin_parse();
+    var v'wallet_address = sc_0~__tact_load_address();
+    return (sc_0, (v'query_id, v'signature, v'wallet_address));
+}
+
+;;
+;; Type: Stake
+;;
+
+builder $Stake$_store(builder build_0, (int, int, slice, slice, slice, int, int, int, int, int, int, int) v) inline {
+    var (v'id, v'is_active, v'master_address, v'owner_address, v'fee_address, v'amount, v'created_at, v'stake_time, v'next_claim, v'mint_count, v'max_claims, v'claims_count) = v;
+    build_0 = build_0.store_int(v'id, 257);
+    build_0 = build_0.store_int(v'is_active, 1);
+    build_0 = __tact_store_address(build_0, v'master_address);
+    build_0 = __tact_store_address(build_0, v'owner_address);
+    var build_1 = begin_cell();
+    build_1 = __tact_store_address(build_1, v'fee_address);
+    build_1 = build_1.store_int(v'amount, 257);
+    build_1 = build_1.store_int(v'created_at, 257);
+    var build_2 = begin_cell();
+    build_2 = build_2.store_int(v'stake_time, 257);
+    build_2 = build_2.store_int(v'next_claim, 257);
+    build_2 = build_2.store_int(v'mint_count, 257);
+    var build_3 = begin_cell();
+    build_3 = build_3.store_int(v'max_claims, 257);
+    build_3 = build_3.store_int(v'claims_count, 257);
+    build_2 = store_ref(build_2, build_3.end_cell());
+    build_1 = store_ref(build_1, build_2.end_cell());
+    build_0 = store_ref(build_0, build_1.end_cell());
+    return build_0;
+}
+
+(slice, ((int, int, slice, slice, slice, int, int, int, int, int, int, int))) $Stake$_load(slice sc_0) inline {
+    var v'id = sc_0~load_int(257);
+    var v'is_active = sc_0~load_int(1);
+    var v'master_address = sc_0~__tact_load_address();
+    var v'owner_address = sc_0~__tact_load_address();
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'fee_address = sc_1~__tact_load_address();
+    var v'amount = sc_1~load_int(257);
+    var v'created_at = sc_1~load_int(257);
+    slice sc_2 = sc_1~load_ref().begin_parse();
+    var v'stake_time = sc_2~load_int(257);
+    var v'next_claim = sc_2~load_int(257);
+    var v'mint_count = sc_2~load_int(257);
+    slice sc_3 = sc_2~load_ref().begin_parse();
+    var v'max_claims = sc_3~load_int(257);
+    var v'claims_count = sc_3~load_int(257);
+    return (sc_0, (v'id, v'is_active, v'master_address, v'owner_address, v'fee_address, v'amount, v'created_at, v'stake_time, v'next_claim, v'mint_count, v'max_claims, v'claims_count));
+}
+
+(slice, ((int, slice, slice, slice, int, int, int, cell, int))) $Stake$init$_load(slice sc_0) inline_ref {
+    var v'id = sc_0~load_int(257);
+    var v'master_address = sc_0~__tact_load_address();
+    var v'owner_address = sc_0~__tact_load_address();
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'fee_address = sc_1~__tact_load_address();
+    var v'amount = sc_1~load_int(257);
+    var v'stake_time = sc_1~load_int(257);
+    slice sc_2 = sc_1~load_ref().begin_parse();
+    var v'mint_count = sc_2~load_int(257);
+    var v'metadata = sc_2~load_dict();
+    var v'max_claims = sc_2~load_int(257);
+    return (sc_0, (v'id, v'master_address, v'owner_address, v'fee_address, v'amount, v'stake_time, v'mint_count, v'metadata, v'max_claims));
+}
+
+(int, int, slice, slice, slice, int, int, int, int, int, int, int) $Stake$_contract_load() impure inline_ref {
+    slice $sc = get_data().begin_parse();
+    __tact_context_sys = $sc~load_ref();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~$Stake$_load();
+    } else {
+        ;; Allow only workchain deployments
+        throw_unless(137, my_address().preload_uint(11) == 1024);
+        (int $id, slice $master_address, slice $owner_address, slice $fee_address, int $amount, int $stake_time, int $mint_count, cell $metadata, int $max_claims) = $sc~$Stake$init$_load();
+        $sc.end_parse();
+        return $Stake$_contract_init($id, $master_address, $owner_address, $fee_address, $amount, $stake_time, $mint_count, $metadata, $max_claims);
+    }
+}
+
+() $Stake$_contract_store((int, int, slice, slice, slice, int, int, int, int, int, int, int) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_ref(__tact_context_sys);
+    b = b.store_int(true, 1);
+    b = $Stake$_store(b, v);
+    set_data(b.end_cell());
+}

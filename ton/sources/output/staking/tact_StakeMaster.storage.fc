@@ -1,0 +1,441 @@
+;;
+;; Type: StateInit
+;; TLB: _ code:^cell data:^cell = StateInit
+;;
+
+(cell, cell) $StateInit$_to_external(((cell, cell)) v) inline {
+    var (v'code, v'data) = v; 
+    return (v'code, v'data);
+}
+
+;;
+;; Type: Context
+;; TLB: _ bounced:bool sender:address value:int257 raw:^slice = Context
+;;
+
+_ $Context$_get_sender((int, slice, int, slice) v) inline {
+    var (v'bounced, v'sender, v'value, v'raw) = v;
+    return v'sender;
+}
+
+;;
+;; Type: SendParameters
+;; TLB: _ bounce:bool to:address value:int257 mode:int257 body:Maybe ^cell code:Maybe ^cell data:Maybe ^cell = SendParameters
+;;
+
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_value_mode_bounce_code_data(slice $to, int $value, int $mode, int $bounce, cell $code, cell $data) inline {
+    return ($bounce, $to, $value, $mode, null(), $code, $data);
+}
+
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_value_mode_bounce_body(slice $to, int $value, int $mode, int $bounce, cell $body) inline {
+    return ($bounce, $to, $value, $mode, $body, null(), null());
+}
+
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_mode_value_body_bounce(slice $to, int $mode, int $value, cell $body, int $bounce) inline {
+    return ($bounce, $to, $value, $mode, $body, null(), null());
+}
+
+;;
+;; Type: TokenNotification
+;; Header: 0x7362d09c
+;; TLB: token_notification#7362d09c query_id:uint64 amount:coins from:address forward_payload:remainder<slice> = TokenNotification
+;;
+
+(slice, ((int, int, slice, slice))) $TokenNotification$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 1935855772);
+    var v'query_id = sc_0~load_uint(64);
+    var v'amount = sc_0~load_coins();
+    var v'from = sc_0~__tact_load_address();
+    var v'forward_payload = sc_0;
+    return (sc_0, (v'query_id, v'amount, v'from, v'forward_payload));
+}
+
+;;
+;; Type: TokenExcesses
+;; Header: 0xd53276db
+;; TLB: token_excesses#d53276db queryId:uint64 = TokenExcesses
+;;
+
+builder $TokenExcesses$_store(builder build_0, (int) v) inline {
+    var (v'queryId) = v;
+    build_0 = store_uint(build_0, 3576854235, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    return build_0;
+}
+
+cell $TokenExcesses$_store_cell((int) v) inline {
+    return $TokenExcesses$_store(begin_cell(), v).end_cell();
+}
+
+(slice, ((int))) $TokenExcesses$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 3576854235);
+    var v'queryId = sc_0~load_uint(64);
+    return (sc_0, (v'queryId));
+}
+
+;;
+;; Type: Deposit
+;; Header: 0x042a3d29
+;; TLB: deposit#042a3d29 query_id:uint64 amount:coins out_amount:coins mint_count:uint32 duration:uint32 owner_address:address signature:^slice max_claims:uint32 = Deposit
+;;
+
+(slice, ((int, int, int, int, int, slice, slice, int))) $Deposit$_load(slice sc_0) inline_ref {
+    throw_unless(129, sc_0~load_uint(32) == 69877033);
+    var v'query_id = sc_0~load_uint(64);
+    var v'amount = sc_0~load_coins();
+    var v'out_amount = sc_0~load_coins();
+    var v'mint_count = sc_0~load_uint(32);
+    var v'duration = sc_0~load_uint(32);
+    var v'owner_address = sc_0~__tact_load_address();
+    var v'signature = sc_0~load_ref().begin_parse();
+    var v'max_claims = sc_0~load_uint(32);
+    return (sc_0, (v'query_id, v'amount, v'out_amount, v'mint_count, v'duration, v'owner_address, v'signature, v'max_claims));
+}
+
+((int, int, int, int, int, slice, slice, int)) $Deposit$_load_not_mut(slice sc_0) inline_ref {
+    var r = sc_0~$Deposit$_load();
+    sc_0.end_parse();
+    return r;
+}
+
+((int, int, int, int, int, slice, slice, int)) $Deposit$_tensor_cast((int, int, int, int, int, slice, slice, int) v) asm """
+    NOP
+""";
+
+(int, int, int, int, int, slice, slice, int) $Deposit$_from_tuple(tuple v) inline {
+    var (int v'query_id, int v'amount, int v'out_amount, int v'mint_count, int v'duration, slice v'owner_address, slice v'signature, int v'max_claims) = __tact_tuple_destroy_8(v);
+    return (v'query_id, v'amount, v'out_amount, v'mint_count, v'duration, __tact_verify_address(v'owner_address), v'signature, v'max_claims);
+}
+
+;;
+;; Type: ProxyMsg
+;; Header: 0xe7f88ddb
+;; TLB: proxy_msg#e7f88ddb query_id:uint64 to:address value:coins body:Maybe ^cell = ProxyMsg
+;;
+
+(slice, ((int, slice, int, cell))) $ProxyMsg$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 3891826139);
+    var v'query_id = sc_0~load_uint(64);
+    var v'to = sc_0~__tact_load_address();
+    var v'value = sc_0~load_coins();
+    var v'body = sc_0~load_int(1) ? sc_0~load_ref() : null();
+    return (sc_0, (v'query_id, v'to, v'value, v'body));
+}
+
+;;
+;; Type: UpdateFeeAddress
+;; Header: 0x07c641ee
+;; TLB: update_fee_address#07c641ee query_id:uint64 new_fee_address:address = UpdateFeeAddress
+;;
+
+(slice, ((int, slice))) $UpdateFeeAddress$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 130433518);
+    var v'query_id = sc_0~load_uint(64);
+    var v'new_fee_address = sc_0~__tact_load_address();
+    return (sc_0, (v'query_id, v'new_fee_address));
+}
+
+;;
+;; Type: UpdateJettonAddress
+;; Header: 0xaed28976
+;; TLB: update_jetton_address#aed28976 query_id:uint64 new_jetton_address:address = UpdateJettonAddress
+;;
+
+(slice, ((int, slice))) $UpdateJettonAddress$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 2933033334);
+    var v'query_id = sc_0~load_uint(64);
+    var v'new_jetton_address = sc_0~__tact_load_address();
+    return (sc_0, (v'query_id, v'new_jetton_address));
+}
+
+;;
+;; Type: UpdateNftAddress
+;; Header: 0xd25ed2fb
+;; TLB: update_nft_address#d25ed2fb query_id:uint64 new_nft_address:address = UpdateNftAddress
+;;
+
+(slice, ((int, slice))) $UpdateNftAddress$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 3529429755);
+    var v'query_id = sc_0~load_uint(64);
+    var v'new_nft_address = sc_0~__tact_load_address();
+    return (sc_0, (v'query_id, v'new_nft_address));
+}
+
+;;
+;; Type: TransferOwnership
+;; Header: 0x6b58f3fd
+;; TLB: transfer_ownership#6b58f3fd query_id:uint64 new_owner:address = TransferOwnership
+;;
+
+(slice, ((int, slice))) $TransferOwnership$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 1800991741);
+    var v'query_id = sc_0~load_uint(64);
+    var v'new_owner = sc_0~__tact_load_address();
+    return (sc_0, (v'query_id, v'new_owner));
+}
+
+;;
+;; Type: Claimed
+;; Header: 0x5f972844
+;; TLB: claimed#5f972844 query_id:uint64 = Claimed
+;;
+
+builder $Claimed$_store(builder build_0, (int) v) inline {
+    var (v'query_id) = v;
+    build_0 = store_uint(build_0, 1603741764, 32);
+    build_0 = build_0.store_uint(v'query_id, 64);
+    return build_0;
+}
+
+cell $Claimed$_store_cell((int) v) inline {
+    return $Claimed$_store(begin_cell(), v).end_cell();
+}
+
+((int)) $Claimed$_constructor_query_id(int $query_id) inline {
+    return ($query_id);
+}
+
+;;
+;; Type: DoMint
+;; Header: 0xa67ba7f7
+;; TLB: do_mint#a67ba7f7 query_id:uint64 receiver:address sender:address signature:^slice mint_count:uint32 amount:coins wallet_address:address fees:coins = DoMint
+;;
+
+(slice, ((int, slice, slice, slice, int, int, slice, int))) $DoMint$_load(slice sc_0) inline_ref {
+    throw_unless(129, sc_0~load_uint(32) == 2793121783);
+    var v'query_id = sc_0~load_uint(64);
+    var v'receiver = sc_0~__tact_load_address();
+    var v'sender = sc_0~__tact_load_address();
+    var v'signature = sc_0~load_ref().begin_parse();
+    var v'mint_count = sc_0~load_uint(32);
+    var v'amount = sc_0~load_coins();
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'wallet_address = sc_1~__tact_load_address();
+    var v'fees = sc_1~load_coins();
+    return (sc_0, (v'query_id, v'receiver, v'sender, v'signature, v'mint_count, v'amount, v'wallet_address, v'fees));
+}
+
+;;
+;; Type: RestakeOldStake
+;; Header: 0xf194bcf4
+;; TLB: restake_old_stake#f194bcf4 query_id:uint64 stake_id:uint64 = RestakeOldStake
+;;
+
+(slice, ((int, int))) $RestakeOldStake$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 4053056756);
+    var v'query_id = sc_0~load_uint(64);
+    var v'stake_id = sc_0~load_uint(64);
+    return (sc_0, (v'query_id, v'stake_id));
+}
+
+;;
+;; Type: WithdrawOldStake
+;; Header: 0x3a1ae31b
+;; TLB: withdraw_old_stake#3a1ae31b query_id:uint64 stake_id:uint64 signature:^slice wallet_address:address = WithdrawOldStake
+;;
+
+(slice, ((int, int, slice, slice))) $WithdrawOldStake$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 974840603);
+    var v'query_id = sc_0~load_uint(64);
+    var v'stake_id = sc_0~load_uint(64);
+    var v'signature = sc_0~load_ref().begin_parse();
+    var v'wallet_address = sc_0~__tact_load_address();
+    return (sc_0, (v'query_id, v'stake_id, v'signature, v'wallet_address));
+}
+
+;;
+;; Type: OldStakeRecord
+;; TLB: _ stake_amount:coins out_amount:coins mint_count:uint8 max_claims:uint32 claims_count:uint32 stake_time:uint32 created_at:uint32 next_claim:uint32 last_claim:uint32 end_time:uint32 wallet_address:address = OldStakeRecord
+;;
+
+((int, int, int, int, int, int, int, int, int, int, slice)) $OldStakeRecord$_not_null(tuple v) inline {
+    throw_if(128, null?(v));
+    var (int vvv'stake_amount, int vvv'out_amount, int vvv'mint_count, int vvv'max_claims, int vvv'claims_count, int vvv'stake_time, int vvv'created_at, int vvv'next_claim, int vvv'last_claim, int vvv'end_time, slice vvv'wallet_address) = __tact_tuple_destroy_11(v);
+    return (vvv'stake_amount, vvv'out_amount, vvv'mint_count, vvv'max_claims, vvv'claims_count, vvv'stake_time, vvv'created_at, vvv'next_claim, vvv'last_claim, vvv'end_time, vvv'wallet_address);
+}
+
+tuple $OldStakeRecord$_as_optional((int, int, int, int, int, int, int, int, int, int, slice) v) inline {
+    var (v'stake_amount, v'out_amount, v'mint_count, v'max_claims, v'claims_count, v'stake_time, v'created_at, v'next_claim, v'last_claim, v'end_time, v'wallet_address) = v;
+    return __tact_tuple_create_11(v'stake_amount, v'out_amount, v'mint_count, v'max_claims, v'claims_count, v'stake_time, v'created_at, v'next_claim, v'last_claim, v'end_time, v'wallet_address);
+}
+
+tuple $OldStakeRecord$_to_tuple(((int, int, int, int, int, int, int, int, int, int, slice)) v) inline {
+    var (v'stake_amount, v'out_amount, v'mint_count, v'max_claims, v'claims_count, v'stake_time, v'created_at, v'next_claim, v'last_claim, v'end_time, v'wallet_address) = v;
+    return __tact_tuple_create_11(v'stake_amount, v'out_amount, v'mint_count, v'max_claims, v'claims_count, v'stake_time, v'created_at, v'next_claim, v'last_claim, v'end_time, v'wallet_address);
+}
+
+tuple $OldStakeRecord$_to_opt_tuple(tuple v) inline {
+    if (null?(v)) { return null(); } 
+    return $OldStakeRecord$_to_tuple($OldStakeRecord$_not_null(v)); 
+}
+
+tuple $OldStakeRecord$_to_opt_external(tuple v) inline {
+    var loaded = $OldStakeRecord$_to_opt_tuple(v);
+    if (null?(loaded)) {
+        return null();
+    } else {
+        return (loaded);
+    }
+}
+
+((int, int, int, int, int, int, int, int, int, int, slice)) $OldStakeRecord$_constructor_stake_amount_out_amount_mint_count_max_claims_claims_count_stake_time_created_at_next_claim_last_claim_end_time_wallet_address(int $stake_amount, int $out_amount, int $mint_count, int $max_claims, int $claims_count, int $stake_time, int $created_at, int $next_claim, int $last_claim, int $end_time, slice $wallet_address) inline {
+    return ($stake_amount, $out_amount, $mint_count, $max_claims, $claims_count, $stake_time, $created_at, $next_claim, $last_claim, $end_time, $wallet_address);
+}
+
+;;
+;; Type: AddOldStakeRecord
+;; Header: 0x8cddb2b2
+;; TLB: add_old_stake_record#8cddb2b2 query_id:uint64 stake_id:uint64 user_address:address stake_amount:coins out_amount:coins mint_count:uint8 max_claims:uint32 claims_count:uint32 stake_time:uint32 created_at:uint32 next_claim:uint32 last_claim:uint32 end_time:uint32 signature:^slice wallet_address:address = AddOldStakeRecord
+;;
+
+(slice, ((int, int, slice, int, int, int, int, int, int, int, int, int, int, slice, slice))) $AddOldStakeRecord$_load(slice sc_0) inline_ref {
+    throw_unless(129, sc_0~load_uint(32) == 2363339442);
+    var v'query_id = sc_0~load_uint(64);
+    var v'stake_id = sc_0~load_uint(64);
+    var v'user_address = sc_0~__tact_load_address();
+    var v'stake_amount = sc_0~load_coins();
+    var v'out_amount = sc_0~load_coins();
+    var v'mint_count = sc_0~load_uint(8);
+    var v'max_claims = sc_0~load_uint(32);
+    var v'claims_count = sc_0~load_uint(32);
+    var v'stake_time = sc_0~load_uint(32);
+    var v'created_at = sc_0~load_uint(32);
+    var v'next_claim = sc_0~load_uint(32);
+    var v'last_claim = sc_0~load_uint(32);
+    var v'end_time = sc_0~load_uint(32);
+    var v'signature = sc_0~load_ref().begin_parse();
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'wallet_address = sc_1~__tact_load_address();
+    return (sc_0, (v'query_id, v'stake_id, v'user_address, v'stake_amount, v'out_amount, v'mint_count, v'max_claims, v'claims_count, v'stake_time, v'created_at, v'next_claim, v'last_claim, v'end_time, v'signature, v'wallet_address));
+}
+
+;;
+;; Type: ClaimOldStake
+;; Header: 0x48243a66
+;; TLB: claim_old_stake#48243a66 query_id:uint64 stake_id:uint64 wallet_address:address signature:^slice = ClaimOldStake
+;;
+
+(slice, ((int, int, slice, slice))) $ClaimOldStake$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 1210333798);
+    var v'query_id = sc_0~load_uint(64);
+    var v'stake_id = sc_0~load_uint(64);
+    var v'wallet_address = sc_0~__tact_load_address();
+    var v'signature = sc_0~load_ref().begin_parse();
+    return (sc_0, (v'query_id, v'stake_id, v'wallet_address, v'signature));
+}
+
+;;
+;; Type: StakeMaster
+;;
+
+builder $StakeMaster$_store(builder build_0, (slice, int, slice, slice, slice, cell, int, slice, cell, int) v) inline {
+    var (v'owner_address, v'owner_pubkey, v'nft_address, v'jetton_address, v'fee_address, v'metadata, v'next_stake_id, v'treasury, v'old_stakes, v'version) = v;
+    build_0 = __tact_store_address(build_0, v'owner_address);
+    build_0 = build_0.store_int(v'owner_pubkey, 257);
+    build_0 = __tact_store_address(build_0, v'nft_address);
+    var build_1 = begin_cell();
+    build_1 = __tact_store_address(build_1, v'jetton_address);
+    build_1 = __tact_store_address(build_1, v'fee_address);
+    build_1 = build_1.store_dict(v'metadata);
+    build_1 = build_1.store_int(v'next_stake_id, 257);
+    var build_2 = begin_cell();
+    build_2 = __tact_store_address(build_2, v'treasury);
+    build_2 = build_2.store_dict(v'old_stakes);
+    build_2 = build_2.store_int(v'version, 257);
+    build_1 = store_ref(build_1, build_2.end_cell());
+    build_0 = store_ref(build_0, build_1.end_cell());
+    return build_0;
+}
+
+(slice, ((slice, int, slice, slice, slice, cell, int, slice, cell, int))) $StakeMaster$_load(slice sc_0) inline {
+    var v'owner_address = sc_0~__tact_load_address();
+    var v'owner_pubkey = sc_0~load_int(257);
+    var v'nft_address = sc_0~__tact_load_address();
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'jetton_address = sc_1~__tact_load_address();
+    var v'fee_address = sc_1~__tact_load_address();
+    var v'metadata = sc_1~load_dict();
+    var v'next_stake_id = sc_1~load_int(257);
+    slice sc_2 = sc_1~load_ref().begin_parse();
+    var v'treasury = sc_2~__tact_load_address();
+    var v'old_stakes = sc_2~load_dict();
+    var v'version = sc_2~load_int(257);
+    return (sc_0, (v'owner_address, v'owner_pubkey, v'nft_address, v'jetton_address, v'fee_address, v'metadata, v'next_stake_id, v'treasury, v'old_stakes, v'version));
+}
+
+(slice, ((slice, int, slice, slice, cell, slice, slice, int))) $StakeMaster$init$_load(slice sc_0) inline_ref {
+    var v'owner_address = sc_0~__tact_load_address();
+    var v'owner_pubkey = sc_0~load_int(257);
+    var v'jetton_address = sc_0~__tact_load_address();
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'nft_address = sc_1~__tact_load_address();
+    var v'metadata = sc_1~load_dict();
+    var v'fee_address = sc_1~__tact_load_address();
+    var v'treasury = sc_1~__tact_load_address();
+    slice sc_2 = sc_1~load_ref().begin_parse();
+    var v'version = sc_2~load_int(257);
+    return (sc_0, (v'owner_address, v'owner_pubkey, v'jetton_address, v'nft_address, v'metadata, v'fee_address, v'treasury, v'version));
+}
+
+(slice, int, slice, slice, slice, cell, int, slice, cell, int) $StakeMaster$_contract_load() impure inline_ref {
+    slice $sc = get_data().begin_parse();
+    __tact_context_sys = $sc~load_ref();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~$StakeMaster$_load();
+    } else {
+        ;; Allow only workchain deployments
+        throw_unless(137, my_address().preload_uint(11) == 1024);
+        (slice $owner_address, int $owner_pubkey, slice $jetton_address, slice $nft_address, cell $metadata, slice $fee_address, slice $treasury, int $version) = $sc~$StakeMaster$init$_load();
+        $sc.end_parse();
+        return $StakeMaster$_contract_init($owner_address, $owner_pubkey, $jetton_address, $nft_address, $metadata, $fee_address, $treasury, $version);
+    }
+}
+
+() $StakeMaster$_contract_store((slice, int, slice, slice, slice, cell, int, slice, cell, int) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_ref(__tact_context_sys);
+    b = b.store_int(true, 1);
+    b = $StakeMaster$_store(b, v);
+    set_data(b.end_cell());
+}
+
+;;
+;; Type: Stake
+;;
+
+builder $Stake$init$_store(builder build_0, (int, slice, slice, slice, int, int, int, int, cell, int) v) inline {
+    var (v'id, v'master_address, v'owner_address, v'fee_address, v'amount, v'out_amount, v'stake_time, v'mint_count, v'metadata, v'max_claims) = v;
+    build_0 = build_0.store_int(v'id, 257);
+    build_0 = __tact_store_address(build_0, v'master_address);
+    build_0 = __tact_store_address(build_0, v'owner_address);
+    var build_1 = begin_cell();
+    build_1 = __tact_store_address(build_1, v'fee_address);
+    build_1 = build_1.store_int(v'amount, 257);
+    build_1 = build_1.store_int(v'out_amount, 257);
+    var build_2 = begin_cell();
+    build_2 = build_2.store_int(v'stake_time, 257);
+    build_2 = build_2.store_int(v'mint_count, 257);
+    build_2 = build_2.store_dict(v'metadata);
+    build_2 = build_2.store_int(v'max_claims, 257);
+    build_1 = store_ref(build_1, build_2.end_cell());
+    build_0 = store_ref(build_0, build_1.end_cell());
+    return build_0;
+}
+
+(cell, cell) $Stake$_init_child(cell sys', int $id, slice $master_address, slice $owner_address, slice $fee_address, int $amount, int $out_amount, int $stake_time, int $mint_count, cell $metadata, int $max_claims) inline_ref {
+    slice sc' = sys'.begin_parse();
+    cell source = sc'~load_dict();
+    cell contracts = new_dict();
+    
+    ;; Contract Code: Stake
+    cell mine = __tact_dict_get_code(source, 13548);
+    contracts = __tact_dict_set_code(contracts, 13548, mine);
+    
+    ;; Build cell
+    builder b = begin_cell();
+    b = b.store_ref(begin_cell().store_dict(contracts).end_cell());
+    b = b.store_int(false, 1);
+    b = $Stake$init$_store(b, ($id, $master_address, $owner_address, $fee_address, $amount, $out_amount, $stake_time, $mint_count, $metadata, $max_claims));
+    return (mine, b.end_cell());
+}

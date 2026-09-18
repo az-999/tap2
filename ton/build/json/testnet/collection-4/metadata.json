@@ -1,0 +1,13 @@
+{
+    "name": "Voucher Tier 4",
+    "description": "MMPRO Bump Voucher Tier 4",
+    "image": "ipfs://bafybeibhvbjxwjjjonercdgathpkbuvyttaqvwcm5l2uiangrf5jeinecy/",
+    "dna": "991cbf6c37102050e2981c6fba7f80658ebbcbbb",
+    "edition": 1,
+    "date": 1716544604822,
+    "project": "Ledger",
+    "points_price": "10M",
+    "tokens_price": "100",
+    "percent": "10%",
+    "attributes": []
+}

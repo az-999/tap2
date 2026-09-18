@@ -1,0 +1,16 @@
+{
+  "name": "Cabin Module",
+  "description": "Cabin Module - test item",
+  "image": "https://ipfs.filebase.io/ipfs/QmagQxxDCSd4VVii5suntHwGvGPvPDBF114WZt3m7H7maZ",
+  "project": "MMPro BUMP",
+  "attributes": [
+    {
+      "trait_type": "Module",
+      "value": "Cabin"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Epic"
+    }
+  ]
+}

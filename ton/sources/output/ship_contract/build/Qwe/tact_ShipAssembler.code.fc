@@ -1,0 +1,419 @@
+#pragma version =0.4.4;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+#include "tact_ShipAssembler.headers.fc";
+#include "tact_ShipAssembler.stdlib.fc";
+#include "tact_ShipAssembler.storage.fc";
+
+;;
+;; Contract ShipAssembler functions
+;;
+
+(int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $ShipAssembler$_contract_init(slice $owner_address, slice $treasury_address, slice $highload_address, (int, int, slice) $royalty_params, int $owner_public_key, cell $collection_metadata, cell $nft_item_metadata) impure inline_ref {
+    var (($royalty_params'numerator, $royalty_params'denominator, $royalty_params'destination)) = $royalty_params;
+    var (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))) = (false, null(), null(), null(), null(), 0, null(), null(), null());
+    $self'owner_address = $owner_address;
+    $self'highload_address = $highload_address;
+    $self'treasury_address = $treasury_address;
+    ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination) = ($royalty_params'numerator, $royalty_params'denominator, $royalty_params'destination);
+    $self'owner_public_key = $owner_public_key;
+    $self'collection_metadata = $collection_metadata;
+    $self'nft_item_metadata = $nft_item_metadata;
+    return ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination));
+}
+
+((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)), int) $ShipAssembler$_fun_msgValue((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $self, int $value) impure inline_ref {
+    var (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))) = $self;
+    int $tonBalanceBeforeMsg = (__tact_my_balance() - $value);
+    int $storageFee = (20000000 - min($tonBalanceBeforeMsg, 20000000));
+    return (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), ($value - ($storageFee + 20000000)));
+}
+
+((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)), int) $ShipAssembler$_fun_verifySignature((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $self, int $ship_level, slice $signature) impure inline_ref {
+    var (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))) = $self;
+    int $hash = cell_hash(end_cell(store_uint(begin_cell(), $ship_level, 256)));
+    return (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), check_signature($hash, $signature, $self'owner_public_key));
+}
+
+((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)), ()) $ShipAssembler$_fun_burnNFT((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $self, slice $nft_contract) impure inline_ref {
+    var (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))) = $self;
+    $global_send($SendParameters$_constructor_to_value_bounce_body($nft_contract, 50000000, true, $Destroy$_store_cell($Destroy$_constructor_query_id($self'nft_counter))));
+    return (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), ());
+}
+
+((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)), (cell, cell)) $ShipAssembler$_fun_getNftItemInit((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $self, int $item_index) impure inline_ref {
+    var (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))) = $self;
+    return (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), $ShipNFT$_init_child(__tact_context_sys, my_address(), $item_index));
+}
+
+((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)), ()) $ShipAssembler$_fun_mint((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $self, slice $sender, int $msgValue, cell $content, int $ship_level) impure inline_ref {
+    var (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))) = $self;
+    $self'nft_counter = ($self'nft_counter + 1);
+    var ($nft_init'code, $nft_init'data) = ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$ShipAssembler$_fun_getNftItemInit($self'nft_counter);
+    $global_send($SendParameters$_constructor_to_value_bounce_body_code_data($global_contractAddress(($nft_init'code, $nft_init'data)), $msgValue, false, $Transfer$_store_cell($Transfer$_constructor_query_id_new_owner_response_destination_custom_payload_forward_amount_forward_payload($ship_level, $sender, my_address(), $content, 0, $global_emptySlice())), $nft_init'code, $nft_init'data));
+    return (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), ());
+}
+
+((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)), slice) $ShipAssembler$_fun_getOwner((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $self) impure inline_ref {
+    var (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))) = $self;
+    return (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), $self'owner_address);
+}
+
+((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)), slice) $ShipAssembler$_fun_get_nft_address_by_index((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $self, int $item_index) impure inline_ref {
+    var (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))) = $self;
+    var ($initCode'code, $initCode'data) = ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$ShipAssembler$_fun_getNftItemInit($item_index);
+    return (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), $global_contractAddress(($initCode'code, $initCode'data)));
+}
+
+((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)), cell) $ShipAssembler$_fun_get_nft_content((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $self, int $index, cell $individual_content) impure inline_ref {
+    var (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))) = $self;
+    tuple $b = __tact_string_builder_start_string();
+    slice $ic = __tact_slice_to_str($Cell$_fun_asSlice($individual_content));
+    $b~__tact_string_builder_append($ic);
+    return (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), __tact_string_builder_end($b));
+}
+
+((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)), (int, cell, slice)) $ShipAssembler$_fun_get_collection_data((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $self) impure inline_ref {
+    var (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))) = $self;
+    tuple $b = __tact_string_builder_start_string();
+    slice $collectionDataString = __tact_slice_to_str($Cell$_fun_asSlice($self'collection_metadata));
+    $b~__tact_string_builder_append($collectionDataString);
+    return (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), $CollectionData$_constructor_next_item_index_collection_content_owner_address($self'nft_counter, $self'collection_metadata, $self'owner_address));
+}
+
+;;
+;; Receivers of a Contract ShipAssembler
+;;
+
+(((int, slice, slice, slice, int, int, cell, cell, (int, int, slice))), ()) $ShipAssembler$_internal_binary_AssembleShipMessage((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $self, (slice, slice, slice, slice, slice, slice, int, slice) $msg) impure inline {
+    var ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)) = $self;
+    var ($msg'nft_contract_1, $msg'nft_contract_2, $msg'nft_contract_3, $msg'nft_contract_4, $msg'nft_contract_5, $msg'nft_contract_6, $msg'ship_level, $msg'signature) = $msg;
+    throw_unless(1629, (~ $self'is_pausable));
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    int $msgValue = $ctx'value;
+    slice $user = __tact_context_get_sender();
+    int $initialBalance = __tact_my_balance();
+    int $signature_valid = ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$ShipAssembler$_fun_verifySignature($msg'ship_level, $msg'signature);
+    throw_unless(48401, $signature_valid);
+    ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$ShipAssembler$_fun_burnNFT($msg'nft_contract_1);
+    ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$ShipAssembler$_fun_burnNFT($msg'nft_contract_2);
+    ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$ShipAssembler$_fun_burnNFT($msg'nft_contract_3);
+    ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$ShipAssembler$_fun_burnNFT($msg'nft_contract_4);
+    ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$ShipAssembler$_fun_burnNFT($msg'nft_contract_5);
+    ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$ShipAssembler$_fun_burnNFT($msg'nft_contract_6);
+    var ($royaltyParams'numerator, $royaltyParams'denominator, $royaltyParams'destination) = ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination);
+    int $royaltyAmount = (($msgValue * $royaltyParams'numerator) / $royaltyParams'denominator);
+    if (($royaltyAmount > 0)) {
+        $global_send($SendParameters$_constructor_to_value_bounce_body($royaltyParams'destination, $royaltyAmount, true, null()));
+    }
+    int $finalBalance = __tact_my_balance();
+    int $mintValue = 100000000;
+    cell $ship_content = $self'nft_item_metadata;
+    ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$ShipAssembler$_fun_mint($user, $mintValue, $ship_content, $msg'ship_level);
+    return (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), ());
+}
+
+(((int, slice, slice, slice, int, int, cell, cell, (int, int, slice))), ()) $ShipAssembler$_internal_binary_UpgradeShip((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $self, (slice, slice, slice, slice, slice, slice, slice, cell, int, slice) $msg) impure inline {
+    var ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)) = $self;
+    var ($msg'nft_contract_1, $msg'nft_contract_2, $msg'nft_contract_3, $msg'nft_contract_4, $msg'nft_contract_5, $msg'nft_contract_6, $msg'nft_contract_7, $msg'ship_content, $msg'ship_level, $msg'signature) = $msg;
+    throw_unless(1629, (~ $self'is_pausable));
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    int $msgValue = $ctx'value;
+    slice $user = __tact_context_get_sender();
+    int $signature_valid = ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$ShipAssembler$_fun_verifySignature($msg'ship_level, $msg'signature);
+    throw_unless(48401, $signature_valid);
+    ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$ShipAssembler$_fun_burnNFT($msg'nft_contract_1);
+    ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$ShipAssembler$_fun_burnNFT($msg'nft_contract_2);
+    ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$ShipAssembler$_fun_burnNFT($msg'nft_contract_3);
+    ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$ShipAssembler$_fun_burnNFT($msg'nft_contract_4);
+    ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$ShipAssembler$_fun_burnNFT($msg'nft_contract_5);
+    ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$ShipAssembler$_fun_burnNFT($msg'nft_contract_6);
+    ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$ShipAssembler$_fun_burnNFT($msg'nft_contract_7);
+    var ($royaltyParams'numerator, $royaltyParams'denominator, $royaltyParams'destination) = ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination);
+    int $royaltyAmount = (($msgValue * $royaltyParams'numerator) / $royaltyParams'denominator);
+    if (($royaltyAmount > 0)) {
+        $global_send($SendParameters$_constructor_to_value_bounce_body($royaltyParams'destination, $royaltyAmount, true, null()));
+    }
+    int $mintValue = 100000000;
+    cell $ship_content = $msg'ship_content;
+    ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$ShipAssembler$_fun_mint($user, $mintValue, $ship_content, $msg'ship_level);
+    return (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), ());
+}
+
+(((int, slice, slice, slice, int, int, cell, cell, (int, int, slice))), ()) $ShipAssembler$_internal_binary_MintNFT((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $self, (int) $msg) impure inline {
+    var ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)) = $self;
+    var ($msg'ship_level) = $msg;
+    throw_unless(57579, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    throw_unless(1629, (~ $self'is_pausable));
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    int $msgValue = $ctx'value;
+    throw_unless(53983, ($msgValue >= 50000000));
+    int $tonBalanceBeforeMsg = (__tact_my_balance() - $msgValue);
+    int $storageFee = (20000000 - min($tonBalanceBeforeMsg, 20000000));
+    $msgValue = ($msgValue - ($storageFee + 20000000));
+    cell $ship_content = $self'nft_item_metadata;
+    ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$ShipAssembler$_fun_mint(__tact_context_get_sender(), $msgValue, $ship_content, $msg'ship_level);
+    return (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), ());
+}
+
+(((int, slice, slice, slice, int, int, cell, cell, (int, int, slice))), ()) $ShipAssembler$_internal_binary_UpdatePublicKey((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $self, (int, int) $msg) impure inline {
+    var ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)) = $self;
+    var ($msg'query_id, $msg'new_public_key) = $msg;
+    throw_unless(47429, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    $self'owner_public_key = $msg'new_public_key;
+    return (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), ());
+}
+
+(((int, slice, slice, slice, int, int, cell, cell, (int, int, slice))), ()) $ShipAssembler$_internal_binary_WithdrawFunds((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $self, (int) $msg) impure inline {
+    var ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)) = $self;
+    var ($msg'query_id) = $msg;
+    throw_unless(63433, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    slice $user = __tact_context_get_sender();
+    int $currentBalance = __tact_my_balance();
+    int $availableBalance = ($currentBalance - 40000000);
+    throw_unless(58821, ($availableBalance > 0));
+    $global_send($SendParameters$_constructor_to_value_bounce_body($self'owner_address, $availableBalance, false, $WithdrawalConfirmation$_store_cell($WithdrawalConfirmation$_constructor_query_id_amount($msg'query_id, $availableBalance))));
+    return (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), ());
+}
+
+(((int, slice, slice, slice, int, int, cell, cell, (int, int, slice))), ()) $ShipAssembler$_internal_binary_Excesses((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $self, (int) $msg) impure inline {
+    var ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)) = $self;
+    var ($msg'query_id) = $msg;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    int $msgValue = (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$ShipAssembler$_fun_msgValue($ctx'value) - $Context$_fun_readForwardFee(($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw)));
+    if (($msgValue > 0)) {
+        $global_send($SendParameters$_constructor_to_value_bounce_body($self'highload_address, $msgValue, false, null()));
+    }
+    return (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), ());
+}
+
+(((int, slice, slice, slice, int, int, cell, cell, (int, int, slice))), ()) $ShipAssembler$_internal_binary_ChangeHighload((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $self, (slice) $msg) impure inline {
+    var ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)) = $self;
+    var ($msg'highload_address) = $msg;
+    throw_unless(46215, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    $self'highload_address = $msg'highload_address;
+    return (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), ());
+}
+
+(((int, slice, slice, slice, int, int, cell, cell, (int, int, slice))), ()) $ShipAssembler$_internal_binary_ChangeTreasury((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $self, (slice) $msg) impure inline {
+    var ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)) = $self;
+    var ($msg'treasury_address) = $msg;
+    throw_unless(46215, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    $self'treasury_address = $msg'treasury_address;
+    return (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), ());
+}
+
+(((int, slice, slice, slice, int, int, cell, cell, (int, int, slice))), ()) $ShipAssembler$_internal_binary_ChangeRoyaltyParams((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $self, (int, int, slice) $msg) impure inline {
+    var ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)) = $self;
+    var ($msg'numerator, $msg'denominator, $msg'destination) = $msg;
+    throw_unless(46215, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    $self'royalty_params'numerator = $msg'numerator;
+    $self'royalty_params'denominator = $msg'denominator;
+    $self'royalty_params'destination = $msg'destination;
+    return (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), ());
+}
+
+(((int, slice, slice, slice, int, int, cell, cell, (int, int, slice))), ()) $ShipAssembler$_internal_binary_SetPause((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $self, (int) $msg) impure inline {
+    var ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)) = $self;
+    var ($msg'is_pausable) = $msg;
+    throw_unless(46215, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    $self'is_pausable = $msg'is_pausable;
+    return (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), ());
+}
+
+(((int, slice, slice, slice, int, int, cell, cell, (int, int, slice))), ()) $ShipAssembler$_internal_binary_GetRoyaltyParams((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $self, (int) $msg) impure inline {
+    var ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)) = $self;
+    var ($msg'query_id) = $msg;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    $global_send($SendParameters$_constructor_to_value_mode_bounce_body($ctx'sender, 0, 64, false, $ReportRoyaltyParams$_store_cell($ReportRoyaltyParams$_constructor_query_id_numerator_denominator_destination($msg'query_id, $self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))));
+    return (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), ());
+}
+
+(((int, slice, slice, slice, int, int, cell, cell, (int, int, slice))), ()) %$ShipAssembler$_internal_empty((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $self) impure inline {
+    var ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)) = $self;
+    return (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), ());
+}
+
+(((int, slice, slice, slice, int, int, cell, cell, (int, int, slice))), ()) $ShipAssembler$_internal_binary_Deploy((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) $self, (int) $deploy) impure inline {
+    var ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)) = $self;
+    var ($deploy'queryId) = $deploy;
+    ($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$ShipAssembler$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId)));
+    return (($self'is_pausable, $self'owner_address, $self'treasury_address, $self'highload_address, $self'owner_public_key, $self'nft_counter, $self'collection_metadata, $self'nft_item_metadata, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), ());
+}
+
+;;
+;; Get methods of a Contract ShipAssembler
+;;
+
+_ %getNftItemInit(int $item_index) method_id(81078) {
+    int $item_index = $item_index;
+    var self = $ShipAssembler$_contract_load();
+    var res = self~$ShipAssembler$_fun_getNftItemInit($item_index);
+    return $StateInit$_to_external(res);
+}
+
+_ %getOwner() method_id(102025) {
+    var self = $ShipAssembler$_contract_load();
+    var res = self~$ShipAssembler$_fun_getOwner();
+    return res;
+}
+
+_ %get_nft_address_by_index(int $item_index) method_id(92067) {
+    int $item_index = $item_index;
+    var self = $ShipAssembler$_contract_load();
+    var res = self~$ShipAssembler$_fun_get_nft_address_by_index($item_index);
+    return res;
+}
+
+_ %get_nft_content(int $index, cell $individual_content) method_id(68445) {
+    int $index = $index;
+    cell $individual_content = $individual_content;
+    var self = $ShipAssembler$_contract_load();
+    var res = self~$ShipAssembler$_fun_get_nft_content($index, $individual_content);
+    return res;
+}
+
+_ %get_collection_data() method_id(102491) {
+    var self = $ShipAssembler$_contract_load();
+    var res = self~$ShipAssembler$_fun_get_collection_data();
+    return $CollectionData$_to_external(res);
+}
+
+_ lazy_deployment_completed() method_id {
+    return get_data().begin_parse().load_int(1);
+}
+
+;;
+;; Routing of a Contract ShipAssembler
+;;
+
+((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)), int) $ShipAssembler$_contract_router_internal((int, slice, slice, slice, int, int, cell, cell, (int, int, slice)) self, int msg_bounced, slice in_msg) impure inline_ref {
+    ;; Handle bounced messages
+    if (msg_bounced) {
+        return (self, true);
+    }
+    
+    ;; Parse incoming message
+    int op = 0;
+    if (slice_bits(in_msg) >= 32) {
+        op = in_msg.preload_uint(32);
+    }
+    
+    
+    ;; Receive AssembleShipMessage message
+    if (op == 1997904914) {
+        var msg = in_msg~$AssembleShipMessage$_load();
+        self~$ShipAssembler$_internal_binary_AssembleShipMessage(msg);
+        return (self, true);
+    }
+    
+    ;; Receive UpgradeShip message
+    if (op == 74989363) {
+        var msg = in_msg~$UpgradeShip$_load();
+        self~$ShipAssembler$_internal_binary_UpgradeShip(msg);
+        return (self, true);
+    }
+    
+    ;; Receive MintNFT message
+    if (op == 386813437) {
+        var msg = in_msg~$MintNFT$_load();
+        self~$ShipAssembler$_internal_binary_MintNFT(msg);
+        return (self, true);
+    }
+    
+    ;; Receive UpdatePublicKey message
+    if (op == 1766758178) {
+        var msg = in_msg~$UpdatePublicKey$_load();
+        self~$ShipAssembler$_internal_binary_UpdatePublicKey(msg);
+        return (self, true);
+    }
+    
+    ;; Receive WithdrawFunds message
+    if (op == 2050115519) {
+        var msg = in_msg~$WithdrawFunds$_load();
+        self~$ShipAssembler$_internal_binary_WithdrawFunds(msg);
+        return (self, true);
+    }
+    
+    ;; Receive Excesses message
+    if (op == 3576854235) {
+        var msg = in_msg~$Excesses$_load();
+        self~$ShipAssembler$_internal_binary_Excesses(msg);
+        return (self, true);
+    }
+    
+    ;; Receive ChangeHighload message
+    if (op == 2316713580) {
+        var msg = in_msg~$ChangeHighload$_load();
+        self~$ShipAssembler$_internal_binary_ChangeHighload(msg);
+        return (self, true);
+    }
+    
+    ;; Receive ChangeTreasury message
+    if (op == 370798756) {
+        var msg = in_msg~$ChangeTreasury$_load();
+        self~$ShipAssembler$_internal_binary_ChangeTreasury(msg);
+        return (self, true);
+    }
+    
+    ;; Receive ChangeRoyaltyParams message
+    if (op == 1209124053) {
+        var msg = in_msg~$ChangeRoyaltyParams$_load();
+        self~$ShipAssembler$_internal_binary_ChangeRoyaltyParams(msg);
+        return (self, true);
+    }
+    
+    ;; Receive SetPause message
+    if (op == 163970072) {
+        var msg = in_msg~$SetPause$_load();
+        self~$ShipAssembler$_internal_binary_SetPause(msg);
+        return (self, true);
+    }
+    
+    ;; Receive GetRoyaltyParams message
+    if (op == 1765620048) {
+        var msg = in_msg~$GetRoyaltyParams$_load();
+        self~$ShipAssembler$_internal_binary_GetRoyaltyParams(msg);
+        return (self, true);
+    }
+    
+    ;; Receive empty message
+    if ((op == 0) & (slice_bits(in_msg) <= 32)) {
+        self~%$ShipAssembler$_internal_empty();
+        return (self, true);
+    }
+    
+    ;; Receive Deploy message
+    if (op == 2490013878) {
+        var msg = in_msg~$Deploy$_load();
+        self~$ShipAssembler$_internal_binary_Deploy(msg);
+        return (self, true);
+    }
+    
+    return (self, false);
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    var msg_flags = cs~load_uint(4);
+    var msg_bounced = -(msg_flags & 1);
+    slice msg_sender_addr = __tact_verify_address(cs~load_msg_addr());
+    __tact_context = (msg_bounced, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var self = $ShipAssembler$_contract_load();
+    
+    ;; Handle operation
+    int handled = self~$ShipAssembler$_contract_router_internal(msg_bounced, in_msg);
+    
+    ;; Throw if not handled
+    throw_unless(130, handled);
+    
+    ;; Persist state
+    $ShipAssembler$_contract_store(self);
+}

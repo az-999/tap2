@@ -1,0 +1,321 @@
+#pragma version =0.4.4;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+#include "tact_Router.headers.fc";
+#include "tact_Router.stdlib.fc";
+#include "tact_Router.storage.fc";
+
+;;
+;; Contract Router functions
+;;
+
+(slice, int, slice, slice, slice, int, (int, int), (int, int)) $Router$_contract_init(slice $owner_address, int $owner_pubkey, slice $referal_address, slice $prize_address, slice $main_address, int $value) impure inline_ref {
+    var (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator))) = (null(), null(), null(), null(), null(), null(), $Divider$_constructor_numerator_denominator(1, 10), $Divider$_constructor_numerator_denominator(1, 100));
+    $self'owner_address = $owner_address;
+    $self'owner_pubkey = $owner_pubkey;
+    $self'referal_address = $referal_address;
+    $self'prize_address = $prize_address;
+    $self'main_address = $main_address;
+    $self'value = $value;
+    return ($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator));
+}
+
+((slice, int, slice, slice, slice, int, (int, int), (int, int)), slice) $Router$_fun_getMainAddress((slice, int, slice, slice, slice, int, (int, int), (int, int)) $self) impure inline_ref {
+    var (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator))) = $self;
+    var $fresh$ret_0 = $self'main_address;
+    return (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)), $fresh$ret_0);
+}
+
+((slice, int, slice, slice, slice, int, (int, int), (int, int)), slice) $Router$_fun_getPrizeAddress((slice, int, slice, slice, slice, int, (int, int), (int, int)) $self) impure inline_ref {
+    var (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator))) = $self;
+    var $fresh$ret_1 = $self'prize_address;
+    return (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)), $fresh$ret_1);
+}
+
+((slice, int, slice, slice, slice, int, (int, int), (int, int)), slice) $Router$_fun_getReferalAddress((slice, int, slice, slice, slice, int, (int, int), (int, int)) $self) impure inline_ref {
+    var (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator))) = $self;
+    var $fresh$ret_2 = $self'referal_address;
+    return (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)), $fresh$ret_2);
+}
+
+((slice, int, slice, slice, slice, int, (int, int), (int, int)), int) $Router$_fun_getValue((slice, int, slice, slice, slice, int, (int, int), (int, int)) $self) impure inline_ref {
+    var (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator))) = $self;
+    var $fresh$ret_3 = $self'value;
+    return (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)), $fresh$ret_3);
+}
+
+((slice, int, slice, slice, slice, int, (int, int), (int, int)), (int, int)) $Router$_fun_getRefDivider((slice, int, slice, slice, slice, int, (int, int), (int, int)) $self) impure inline_ref {
+    var (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator))) = $self;
+    var $fresh$ret_4 = ($self'refDivider'numerator, $self'refDivider'denominator);
+    return (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)), $fresh$ret_4);
+}
+
+((slice, int, slice, slice, slice, int, (int, int), (int, int)), (int, int)) $Router$_fun_getPrizeDivider((slice, int, slice, slice, slice, int, (int, int), (int, int)) $self) impure inline_ref {
+    var (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator))) = $self;
+    var $fresh$ret_5 = ($self'prizeDivider'numerator, $self'prizeDivider'denominator);
+    return (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)), $fresh$ret_5);
+}
+
+;;
+;; Receivers of a Contract Router
+;;
+
+(((slice, int, slice, slice, slice, int, (int, int), (int, int))), ()) $Router$_internal_binary_TransferOwnership((slice, int, slice, slice, slice, int, (int, int), (int, int)) $self, (int, slice) $msg) impure inline {
+    var ($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)) = $self;
+    var ($msg'query_id, $msg'new_owner) = $msg;
+    throw_unless(36952, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    $self'owner_address = $msg'new_owner;
+    return (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)), ());
+}
+
+(((slice, int, slice, slice, slice, int, (int, int), (int, int))), ()) $Router$_internal_binary_ProxyMsg((slice, int, slice, slice, slice, int, (int, int), (int, int)) $self, (slice, int, cell) $msg) impure inline {
+    var ($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)) = $self;
+    var ($msg'to, $msg'value, $msg'body) = $msg;
+    throw_unless(12603, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    $global_send($SendParameters$_constructor_to_mode_value_body_bounce($msg'to, 64, $msg'value, $msg'body, false));
+    return (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)), ());
+}
+
+(((slice, int, slice, slice, slice, int, (int, int), (int, int))), ()) $Router$_internal_binary_SetMainAddress((slice, int, slice, slice, slice, int, (int, int), (int, int)) $self, (int, slice) $msg) impure inline {
+    var ($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)) = $self;
+    var ($msg'query_id, $msg'main_address) = $msg;
+    throw_unless(37779, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    $self'main_address = $msg'main_address;
+    return (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)), ());
+}
+
+(((slice, int, slice, slice, slice, int, (int, int), (int, int))), ()) $Router$_internal_binary_SetPrizeAddress((slice, int, slice, slice, slice, int, (int, int), (int, int)) $self, (int, slice) $msg) impure inline {
+    var ($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)) = $self;
+    var ($msg'query_id, $msg'prize_address) = $msg;
+    throw_unless(6827, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    $self'prize_address = $msg'prize_address;
+    return (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)), ());
+}
+
+(((slice, int, slice, slice, slice, int, (int, int), (int, int))), ()) $Router$_internal_binary_SetReferalAddress((slice, int, slice, slice, slice, int, (int, int), (int, int)) $self, (int, slice) $msg) impure inline {
+    var ($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)) = $self;
+    var ($msg'query_id, $msg'referal_address) = $msg;
+    throw_unless(28099, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    $self'referal_address = $msg'referal_address;
+    return (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)), ());
+}
+
+(((slice, int, slice, slice, slice, int, (int, int), (int, int))), ()) $Router$_internal_binary_UpdatePublicKey((slice, int, slice, slice, slice, int, (int, int), (int, int)) $self, (int, int) $msg) impure inline {
+    var ($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)) = $self;
+    var ($msg'query_id, $msg'new_public_key) = $msg;
+    throw_unless(46826, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    $self'owner_pubkey = $msg'new_public_key;
+    return (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)), ());
+}
+
+(((slice, int, slice, slice, slice, int, (int, int), (int, int))), ()) $Router$_internal_binary_UpdateValue((slice, int, slice, slice, slice, int, (int, int), (int, int)) $self, (int, int) $msg) impure inline {
+    var ($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)) = $self;
+    var ($msg'query_id, $msg'new_value) = $msg;
+    throw_unless(57449, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    $self'value = $msg'new_value;
+    return (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)), ());
+}
+
+(((slice, int, slice, slice, slice, int, (int, int), (int, int))), ()) $Router$_internal_binary_SetDividors((slice, int, slice, slice, slice, int, (int, int), (int, int)) $self, (int, (int, int), (int, int)) $msg) impure inline {
+    var ($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)) = $self;
+    var ($msg'query_id, ($msg'ref_divider'numerator, $msg'ref_divider'denominator), ($msg'prize_divider'numerator, $msg'prize_divider'denominator)) = $msg;
+    throw_unless(4090, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    ($self'refDivider'numerator, $self'refDivider'denominator) = ($msg'ref_divider'numerator, $msg'ref_divider'denominator);
+    ($self'prizeDivider'numerator, $self'prizeDivider'denominator) = ($msg'prize_divider'numerator, $msg'prize_divider'denominator);
+    return (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)), ());
+}
+
+(((slice, int, slice, slice, slice, int, (int, int), (int, int))), ()) $Router$_internal_binary_Deposit((slice, int, slice, slice, slice, int, (int, int), (int, int)) $self, (int, int, slice) $msg) impure inline {
+    var ($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)) = $self;
+    var ($msg'query_id, $msg'value, $msg'signature) = $msg;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    int $msgValue = $ctx'value;
+    throw_unless(53983, ($msgValue == $self'value));
+    int $validate = $Cell$_fun_hash($Builder$_fun_endCell(store_uint(store_uint($global_beginCell(), $msg'query_id, 64), $msg'value, 256)));
+    int $signature_valid = $global_checkSignature($validate, $msg'signature, $self'owner_pubkey);
+    throw_unless(48401, $signature_valid);
+    int $refValue = (($msgValue * $self'refDivider'numerator) / $self'refDivider'denominator);
+    int $prizeValue = (($msgValue * $self'prizeDivider'numerator) / $self'prizeDivider'denominator);
+    int $mainValue = (($msgValue - $refValue) - $prizeValue);
+    $global_send($SendParameters$_constructor_to_value_bounce($self'referal_address, $refValue, false));
+    $global_send($SendParameters$_constructor_to_value_bounce($self'prize_address, $prizeValue, false));
+    $global_send($SendParameters$_constructor_to_value_bounce($self'main_address, $mainValue, false));
+    return (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)), ());
+}
+
+(((slice, int, slice, slice, slice, int, (int, int), (int, int))), ()) %$Router$_internal_empty((slice, int, slice, slice, slice, int, (int, int), (int, int)) $self) impure inline {
+    var ($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)) = $self;
+    throw_unless(61734, ( __tact_slice_eq_bits($self'owner_address, __tact_context_get_sender()) ));
+    return (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)), ());
+}
+
+(((slice, int, slice, slice, slice, int, (int, int), (int, int))), ()) $Router$_internal_binary_Deploy((slice, int, slice, slice, slice, int, (int, int), (int, int)) $self, (int) $deploy) impure inline {
+    var ($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)) = $self;
+    var ($deploy'queryId) = $deploy;
+    ($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator))~$Router$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId)));
+    return (($self'owner_address, $self'owner_pubkey, $self'referal_address, $self'prize_address, $self'main_address, $self'value, ($self'refDivider'numerator, $self'refDivider'denominator), ($self'prizeDivider'numerator, $self'prizeDivider'denominator)), ());
+}
+
+;;
+;; Get methods of a Contract Router
+;;
+
+_ %getMainAddress() method_id(96933) {
+    var self = $Router$_contract_load();
+    var res = self~$Router$_fun_getMainAddress();
+    return res;
+}
+
+_ %getPrizeAddress() method_id(124260) {
+    var self = $Router$_contract_load();
+    var res = self~$Router$_fun_getPrizeAddress();
+    return res;
+}
+
+_ %getReferalAddress() method_id(109392) {
+    var self = $Router$_contract_load();
+    var res = self~$Router$_fun_getReferalAddress();
+    return res;
+}
+
+_ %getValue() method_id(69972) {
+    var self = $Router$_contract_load();
+    var res = self~$Router$_fun_getValue();
+    return res;
+}
+
+_ %getRefDivider() method_id(117871) {
+    var self = $Router$_contract_load();
+    var res = self~$Router$_fun_getRefDivider();
+    return $Divider$_to_external(res);
+}
+
+_ %getPrizeDivider() method_id(71973) {
+    var self = $Router$_contract_load();
+    var res = self~$Router$_fun_getPrizeDivider();
+    return $Divider$_to_external(res);
+}
+
+_ lazy_deployment_completed() method_id {
+    return get_data().begin_parse().load_int(1);
+}
+
+;;
+;; Routing of a Contract Router
+;;
+
+((slice, int, slice, slice, slice, int, (int, int), (int, int)), int) $Router$_contract_router_internal((slice, int, slice, slice, slice, int, (int, int), (int, int)) self, int msg_bounced, slice in_msg) impure inline_ref {
+    ;; Handle bounced messages
+    if (msg_bounced) {
+        return (self, true);
+    }
+    
+    ;; Parse incoming message
+    int op = 0;
+    if (slice_bits(in_msg) >= 32) {
+        op = in_msg.preload_uint(32);
+    }
+    
+    
+    ;; Receive TransferOwnership message
+    if (op == 1800991741) {
+        var msg = in_msg~$TransferOwnership$_load();
+        self~$Router$_internal_binary_TransferOwnership(msg);
+        return (self, true);
+    }
+    
+    ;; Receive ProxyMsg message
+    if (op == 3531620403) {
+        var msg = in_msg~$ProxyMsg$_load();
+        self~$Router$_internal_binary_ProxyMsg(msg);
+        return (self, true);
+    }
+    
+    ;; Receive SetMainAddress message
+    if (op == 2534796593) {
+        var msg = in_msg~$SetMainAddress$_load();
+        self~$Router$_internal_binary_SetMainAddress(msg);
+        return (self, true);
+    }
+    
+    ;; Receive SetPrizeAddress message
+    if (op == 894415229) {
+        var msg = in_msg~$SetPrizeAddress$_load();
+        self~$Router$_internal_binary_SetPrizeAddress(msg);
+        return (self, true);
+    }
+    
+    ;; Receive SetReferalAddress message
+    if (op == 1232702265) {
+        var msg = in_msg~$SetReferalAddress$_load();
+        self~$Router$_internal_binary_SetReferalAddress(msg);
+        return (self, true);
+    }
+    
+    ;; Receive UpdatePublicKey message
+    if (op == 1599039702) {
+        var msg = in_msg~$UpdatePublicKey$_load();
+        self~$Router$_internal_binary_UpdatePublicKey(msg);
+        return (self, true);
+    }
+    
+    ;; Receive UpdateValue message
+    if (op == 1382399430) {
+        var msg = in_msg~$UpdateValue$_load();
+        self~$Router$_internal_binary_UpdateValue(msg);
+        return (self, true);
+    }
+    
+    ;; Receive SetDividors message
+    if (op == 4172235513) {
+        var msg = in_msg~$SetDividors$_load();
+        self~$Router$_internal_binary_SetDividors(msg);
+        return (self, true);
+    }
+    
+    ;; Receive Deposit message
+    if (op == 2955650924) {
+        var msg = in_msg~$Deposit$_load();
+        self~$Router$_internal_binary_Deposit(msg);
+        return (self, true);
+    }
+    
+    ;; Receive empty message
+    if ((op == 0) & (slice_bits(in_msg) <= 32)) {
+        self~%$Router$_internal_empty();
+        return (self, true);
+    }
+    
+    ;; Receive Deploy message
+    if (op == 2490013878) {
+        var msg = in_msg~$Deploy$_load();
+        self~$Router$_internal_binary_Deploy(msg);
+        return (self, true);
+    }
+    
+    return (self, false);
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    var msg_flags = cs~load_uint(4);
+    var msg_bounced = -(msg_flags & 1);
+    slice msg_sender_addr = __tact_verify_address(cs~load_msg_addr());
+    __tact_context = (msg_bounced, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var self = $Router$_contract_load();
+    
+    ;; Handle operation
+    int handled = self~$Router$_contract_router_internal(msg_bounced, in_msg);
+    
+    ;; Throw if not handled
+    throw_unless(130, handled);
+    
+    ;; Persist state
+    $Router$_contract_store(self);
+}

@@ -1,0 +1,125 @@
+#pragma version =0.4.4;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+#include "tact_ShipNFT.headers.fc";
+#include "tact_ShipNFT.stdlib.fc";
+#include "tact_ShipNFT.storage.fc";
+
+;;
+;; Contract ShipNFT functions
+;;
+
+(slice, slice, int, int, slice, cell) $ShipNFT$_contract_init(slice $collection_address, int $item_index, slice $owner, cell $content) impure inline_ref {
+    var (($self'collection_address, $self'trusted_contract, $self'item_index, $self'is_initialized, $self'owner, $self'content)) = (null(), null(), null(), null(), null(), null());
+    throw_unless(23386, ( __tact_slice_eq_bits($collection_address, __tact_context_get_sender()) ));
+    $self'collection_address = $collection_address;
+    $self'trusted_contract = $collection_address;
+    $self'item_index = $item_index;
+    $self'is_initialized = true;
+    $self'owner = $owner;
+    $self'content = $content;
+    return ($self'collection_address, $self'trusted_contract, $self'item_index, $self'is_initialized, $self'owner, $self'content);
+}
+
+((slice, slice, int, int, slice, cell), int) $ShipNFT$_fun_getShipData((slice, slice, int, int, slice, cell) $self) impure inline_ref {
+    var (($self'collection_address, $self'trusted_contract, $self'item_index, $self'is_initialized, $self'owner, $self'content)) = $self;
+    return (($self'collection_address, $self'trusted_contract, $self'item_index, $self'is_initialized, $self'owner, $self'content), $self'item_index);
+}
+
+;;
+;; Receivers of a Contract ShipNFT
+;;
+
+(((slice, slice, int, int, slice, cell)), ()) $ShipNFT$_internal_binary_Transfer((slice, slice, int, int, slice, cell) $self, (slice, int, int) $msg) impure inline {
+    var ($self'collection_address, $self'trusted_contract, $self'item_index, $self'is_initialized, $self'owner, $self'content) = $self;
+    var ($msg'new_owner, $msg'forward_amount, $msg'query_id) = $msg;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    throw_unless(54727, ( __tact_slice_eq_bits(__tact_not_null($self'owner), $ctx'sender) ));
+    $self'owner = $msg'new_owner;
+    if (($msg'forward_amount > 0)) {
+        $global_send($SendParameters$_constructor_to_value_bounce_body($msg'new_owner, $msg'forward_amount, true, $OwnershipAssigned$_store_cell($OwnershipAssigned$_constructor_query_id_prev_owner($msg'query_id, $ctx'sender))));
+    }
+    return (($self'collection_address, $self'trusted_contract, $self'item_index, $self'is_initialized, $self'owner, $self'content), ());
+}
+
+(((slice, slice, int, int, slice, cell)), ()) $ShipNFT$_internal_binary_BurnNFT((slice, slice, int, int, slice, cell) $self, tuple $msg) impure inline {
+    var ($self'collection_address, $self'trusted_contract, $self'item_index, $self'is_initialized, $self'owner, $self'content) = $self;
+    var $msg = $msg;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    throw_unless(49280, ( (( __tact_slice_eq_bits(__tact_not_null($self'owner), $ctx'sender) )) ? (true) : (( __tact_slice_eq_bits($self'trusted_contract, $ctx'sender) )) ));
+    $self'owner = null();
+    $self'is_initialized = false;
+    return (($self'collection_address, $self'trusted_contract, $self'item_index, $self'is_initialized, $self'owner, $self'content), ());
+}
+
+;;
+;; Get methods of a Contract ShipNFT
+;;
+
+_ %getShipData() method_id(123063) {
+    var self = $ShipNFT$_contract_load();
+    var res = self~$ShipNFT$_fun_getShipData();
+    return res;
+}
+
+_ lazy_deployment_completed() method_id {
+    return get_data().begin_parse().load_int(1);
+}
+
+;;
+;; Routing of a Contract ShipNFT
+;;
+
+((slice, slice, int, int, slice, cell), int) $ShipNFT$_contract_router_internal((slice, slice, int, int, slice, cell) self, int msg_bounced, slice in_msg) impure inline_ref {
+    ;; Handle bounced messages
+    if (msg_bounced) {
+        return (self, true);
+    }
+    
+    ;; Parse incoming message
+    int op = 0;
+    if (slice_bits(in_msg) >= 32) {
+        op = in_msg.preload_uint(32);
+    }
+    
+    
+    ;; Receive Transfer message
+    if (op == 1530664467) {
+        var msg = in_msg~$Transfer$_load();
+        self~$ShipNFT$_internal_binary_Transfer(msg);
+        return (self, true);
+    }
+    
+    ;; Receive BurnNFT message
+    if (op == 2722049370) {
+        var msg = in_msg~$BurnNFT$_load();
+        self~$ShipNFT$_internal_binary_BurnNFT(msg);
+        return (self, true);
+    }
+    
+    return (self, false);
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    var msg_flags = cs~load_uint(4);
+    var msg_bounced = -(msg_flags & 1);
+    slice msg_sender_addr = __tact_verify_address(cs~load_msg_addr());
+    __tact_context = (msg_bounced, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var self = $ShipNFT$_contract_load();
+    
+    ;; Handle operation
+    int handled = self~$ShipNFT$_contract_router_internal(msg_bounced, in_msg);
+    
+    ;; Throw if not handled
+    throw_unless(130, handled);
+    
+    ;; Persist state
+    $ShipNFT$_contract_store(self);
+}
