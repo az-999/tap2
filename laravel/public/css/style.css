@@ -1,0 +1,21 @@
+@import url(./styles/dashboard/dashboard.css);
+@import url(./styles/footer/footer.css);
+@import url(./styles/header/header.css);
+@import url(./styles/main/main.css);
+
+html {
+  width: 100vw;
+  height: 100vh;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: "Gilroy", sans-serif;
+  color: #181833;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
